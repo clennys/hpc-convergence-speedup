@@ -1,5 +1,5 @@
-CXX		= mpic++
-CXXFLAGS= -pedantic-errors -Wall -Wextra -Werror
+CXX		= mpicxx
+# CXXFLAGS= -pedantic-errors -Wall -Wextra -Werror
 LDFLAGS	=
 BUILD	= ./build
 OBJ_DIR	= $(BUILD)/objects
@@ -10,7 +10,8 @@ SRC		= $(wildcard src/*.cc)
 
 OBJECTS	= $(SRC:%.cc=$(OBJ_DIR)/%.o)
 DEPENDENCIES \
-         := $(OBJECTS:.o=.d)
+	:= $(OBJECTS:.o=.d)
+MPI	:= \ /usr/include/openmpi-x86_64/mpi.h
 
 all: build $(APP_DIR)/$(TARGET)
 
@@ -22,9 +23,9 @@ $(APP_DIR)/$(TARGET): $(OBJECTS)
 	@mkdir -p $(@D)
 	$(CXX) $(CXXFLAGS) -o $(APP_DIR)/$(TARGET) $^ $(LDFLAGS)
 
--include $(DEPENDENCIES)
+-include $(DEPENDENCIES) $(MPI)
 
-.PHONY: all build clean debug release info
+.PHONY: all build clean debug release info optimized
 
 build:
 	@mkdir -p $(APP_DIR)
@@ -42,6 +43,9 @@ optimized: all
 clean:
 	-@rm -rvf $(OBJ_DIR)/*
 	-@rm -rvf $(APP_DIR)/*
+
+bear:
+	@bear -- make
 
 info:
 	@echo "[*] Application dir: ${APP_DIR}     "

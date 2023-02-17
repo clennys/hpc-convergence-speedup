@@ -1,0 +1,16 @@
+[
+  {
+    "arguments": [
+      "/usr/lib64/ccache/g++",
+      "-Iinclude/",
+      "-c",
+      "-I/usr/include/openmpi-x86_64",
+      "-o",
+      "build/objects/src/main.o",
+      "src/main.cc"
+    ],
+    "directory": "/home/dhuber/University/numerical-training",
+    "file": "/home/dhuber/University/numerical-training/src/main.cc",
+    "output": "/home/dhuber/University/numerical-training/build/objects/src/main.o"
+  }
+]
