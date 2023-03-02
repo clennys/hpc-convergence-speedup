@@ -6,16 +6,16 @@ OBJ_DIR	= $(BUILD)/objects
 APP_DIR	= $(BUILD)/apps
 TARGET	= main
 INCLUDE	= -Iinclude/
-SRC		= $(wildcard src/*.cc)
+SRC		= $(wildcard src/*.cxx)
 
-OBJECTS	= $(SRC:%.cc=$(OBJ_DIR)/%.o)
+OBJECTS	= $(SRC:%.cxx=$(OBJ_DIR)/%.o)
 DEPENDENCIES \
 	:= $(OBJECTS:.o=.d)
 MPI	:= \ /usr/include/openmpi-x86_64/mpi.h
 
 all: build $(APP_DIR)/$(TARGET)
 
-$(OBJ_DIR)/%.o: %.cc
+$(OBJ_DIR)/%.o: %.cxx
 	@mkdir -p $(@D)
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c $< -MMD -o $@
 
