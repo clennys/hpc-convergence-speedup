@@ -29,7 +29,7 @@ template <typename T> void print_matrix(T *matrix, int m) {
     cout << endl;
   }
 }
-template <typename T> void zeros_matrix(T *matrix, int m, int n) {
+template <typename T> void zero_matrix_init(T *matrix, int m, int n) {
   for (int i = 0; i < m; i++) {
     for (int j = 0; j < n; j++) {
       matrix[i * n + j] = 0;

@@ -1,6 +1,8 @@
 #include "../include/mpi_module.h"
+#include "../include/param.h"
 #include "../include/spd_matrix_generator.h"
 #include "../include/util.h"
+#include "gauss_seidel.h"
 #include "mpi.h"
 #include <cstdlib>
 #include <cstring>
@@ -9,60 +11,75 @@
 using namespace std;
 
 void damped_jacobi_setup(double *mat, double *x_init, double *b,
-                         double *sub_mat, double *omega, int mat_dim,
-                         int block_length, int my_rank) {
+                         double *sub_mat, param p) {
 
-  MPI_Bcast(omega, 1, MPI_DOUBLE, ROOT_PROC, MPI_COMM_WORLD);
-  MPI_Bcast(b, mat_dim, MPI_DOUBLE, ROOT_PROC, MPI_COMM_WORLD);
-  MPI_Bcast(x_init, mat_dim, MPI_DOUBLE, ROOT_PROC, MPI_COMM_WORLD);
+  MPI_Bcast(b, p.mat_dim, MPI_DOUBLE, ROOT_PROC, MPI_COMM_WORLD);
+  MPI_Bcast(x_init, p.mat_dim, MPI_DOUBLE, ROOT_PROC, MPI_COMM_WORLD);
 
-  MPI_Scatter(mat, block_length * mat_dim, MPI_DOUBLE, sub_mat,
-              block_length * mat_dim, MPI_DOUBLE, ROOT_PROC, MPI_COMM_WORLD);
+  MPI_Scatter(mat, p.block_length * p.mat_dim, MPI_DOUBLE, sub_mat,
+              p.block_length * p.mat_dim, MPI_DOUBLE, ROOT_PROC,
+              MPI_COMM_WORLD);
 }
 
 void damped_jacobi_xnew(double *sub_mat, double *x, double *b, double *x_new,
-                        double *omega, int block_length, int mat_dim,
-                        int my_rank) {
+                        param p) {
   double sum;
 
-  for (int i = 0; i < block_length; i++) {
+  for (int i = 0; i < p.block_length; i++) {
     sum = 0;
-    for (int j = 0; j < mat_dim; j++) {
-      sum += sub_mat[i * mat_dim + j] * x[j];
+    for (int j = 0; j < p.mat_dim; j++) {
+      sum += sub_mat[i * p.mat_dim + j] * x[j];
     }
 
     x_new[i] =
-        x[my_rank * block_length + i] -
-        ((*omega) / sub_mat[i * mat_dim + (my_rank * block_length + i)]) *
-            (sum - b[my_rank * block_length + i]);
+        x[p.my_rank * p.block_length + i] -
+        (p.omega / sub_mat[i * p.mat_dim + (p.my_rank * p.block_length + i)]) *
+            (sum - b[p.my_rank * p.block_length + i]);
   }
+}
+void damped_jacobi_r(double *sub_mat, double *x, double *b, double *r_local,
+                     double *r_gathered, param p) {
+  gauss_seidel_r(sub_mat, x, b, r_local, p);
+  MPI_Gather(r_local, p.block_length, MPI_DOUBLE, r_gathered, p.block_length,
+             MPI_DOUBLE, ROOT_PROC, MPI_COMM_WORLD);
 }
 
 void damped_jacobi_step(double *sub_mat, double *x, double *b, double *x_new,
-                        double *omega, int block_length, int mat_dim,
-                        int my_rank) {
+                        param p) {
 
-  damped_jacobi_xnew(sub_mat, x, b, x_new, omega, block_length, mat_dim,
-                     my_rank);
+  damped_jacobi_xnew(sub_mat, x, b, x_new, p);
 
-  MPI_Allgather(x_new, block_length, MPI_DOUBLE, x, block_length, MPI_DOUBLE,
-                MPI_COMM_WORLD);
+  MPI_Allgather(x_new, p.block_length, MPI_DOUBLE, x, p.block_length,
+                MPI_DOUBLE, MPI_COMM_WORLD);
 }
 
-int damped_jacobi(double *mat, double *x, double *b, double *omega, int mat_dim,
-                  int my_rank, int nr_proc) {
-  int block_length = mat_dim / nr_proc;
-  double x_new[block_length];
-  double sub_mat[block_length * mat_dim];
+bool damped_jacobi_terminate(double *r, double *x, param p) {
+  return gauss_seidel_terminate(r, x, p);
+}
 
-  damped_jacobi_setup(mat, x, b, sub_mat, omega, mat_dim, block_length,
-                      my_rank);
+void damped_jacobi(double *mat, double *x, double *b, param p) {
+  double x_new[p.block_length];
+  double sub_mat[p.block_length * p.mat_dim];
+  double r_local[p.block_length], r_gathered[p.mat_dim];
+  damped_jacobi_setup(mat, x, b, sub_mat, p);
   int count = 0;
-  while (count < 10) {
-    damped_jacobi_step(sub_mat, x, b, x_new, omega, block_length, mat_dim,
-                       my_rank);
+  int continues = 1;
+  while (true) {
+    damped_jacobi_step(sub_mat, x, b, x_new, p);
+    damped_jacobi_r(sub_mat, x, b, r_local, r_gathered, p);
+
+    if (p.my_rank == ROOT_PROC) {
+      if (damped_jacobi_terminate(r_gathered, x, p)) {
+        continues = 0;
+      }
+    }
+
+    MPI_Bcast(&continues, 1, MPI_INT, ROOT_PROC, MPI_COMM_WORLD);
+
+    if (continues == 0) {
+      return;
+    }
+
     count++;
   }
-
-  return 0;
 }
