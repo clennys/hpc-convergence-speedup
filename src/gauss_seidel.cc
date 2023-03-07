@@ -79,6 +79,10 @@ bool gauss_seidel_terminate(double *r, double *x, param p) {
   double diff = sqrt(norm_r) / sqrt(norm_x);
   diff = diff > 0 ? diff : -diff;
   cout << "DIFF: " << diff << endl;
+  cout << "R: " << endl;
+  print_vector(r, p.mat_dim);
+  cout << "X: " << endl;
+  print_vector(x, p.mat_dim);
 
   if (diff < p.epsilon) {
     return true;

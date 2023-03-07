@@ -54,7 +54,7 @@ template <typename T> void spd_matrix_generator(T *result, int dim, bool rd) {
   for (int i = 0; i < dim; i++) {
     for (int j = 0; j < dim; j++) {
       if (i == j) {
-        matrix[i * dim + j] = generate_random_value<T>(100, 10);
+        matrix[i * dim + j] = generate_random_value<T>(1, 10);
       } else if (i > j) {
         matrix[i * dim + j] = generate_random_value<T>(0, 10);
       } else {

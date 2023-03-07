@@ -33,9 +33,10 @@ int main(int argc, char *argv[]) {
     x_true = new double[p.mat_dim];
     vector_x_generator(x_true, p.mat_dim, true);
     matrix_multiplication(b, matrix, x_true, p.mat_dim, p.mat_dim, 1);
-    print_matrix(matrix, p.mat_dim);
+    // print_matrix(matrix, p.mat_dim);
   }
 
+  double start = MPI_Wtime();
   if (argc < 3) {
     if (strcmp(argv[1], "-dj") == 0) {
       if (my_rank == ROOT_PROC) {
@@ -53,6 +54,7 @@ int main(int argc, char *argv[]) {
       }
     }
   }
+  double end = MPI_Wtime();
 
   if (ROOT_PROC == my_rank) {
     cout << endl << "Solution for x is: " << endl;
@@ -61,6 +63,7 @@ int main(int argc, char *argv[]) {
     print_vector(x_true, p.mat_dim);
     cout << endl << "b is: " << endl;
     print_vector(b, p.mat_dim);
+    cout << "The process took " << end - start << " seconds to run." << endl;
   }
 
   finish_MPI();
