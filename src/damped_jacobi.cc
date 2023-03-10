@@ -66,7 +66,7 @@ void damped_jacobi(double *mat, double *x, double *b, param p) {
 
   int count = 0;
   int continues = 1;
-  while (count < 25) {
+  while (true) {
     damped_jacobi_step(sub_mat, x, b, x_new, p);
     damped_jacobi_r(sub_mat, x, b, r_local, r_gathered, p);
 
