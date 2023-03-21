@@ -12,5 +12,103 @@
     "directory": "/home/dhuber/University/numerical-training",
     "file": "/home/dhuber/University/numerical-training/src/main.cc",
     "output": "/home/dhuber/University/numerical-training/build/objects/src/main.o"
+  },
+  {
+    "arguments": [
+      "/usr/lib64/ccache/g++",
+      "-Iinclude/",
+      "-c",
+      "-I/usr/include/openmpi-x86_64",
+      "-o",
+      "build/objects/src/inputs/matrix_generator.o",
+      "src/inputs/matrix_generator.cc"
+    ],
+    "directory": "/home/dhuber/University/numerical-training",
+    "file": "/home/dhuber/University/numerical-training/src/inputs/matrix_generator.cc",
+    "output": "/home/dhuber/University/numerical-training/build/objects/src/inputs/matrix_generator.o"
+  },
+  {
+    "arguments": [
+      "/usr/lib64/ccache/g++",
+      "-Iinclude/",
+      "-c",
+      "-I/usr/include/openmpi-x86_64",
+      "-o",
+      "build/objects/src/inputs/param.o",
+      "src/inputs/param.cc"
+    ],
+    "directory": "/home/dhuber/University/numerical-training",
+    "file": "/home/dhuber/University/numerical-training/src/inputs/param.cc",
+    "output": "/home/dhuber/University/numerical-training/build/objects/src/inputs/param.o"
+  },
+  {
+    "arguments": [
+      "/usr/lib64/ccache/g++",
+      "-Iinclude/",
+      "-c",
+      "-I/usr/include/openmpi-x86_64",
+      "-o",
+      "build/objects/src/parallel/mpi_module.o",
+      "src/parallel/mpi_module.cc"
+    ],
+    "directory": "/home/dhuber/University/numerical-training",
+    "file": "/home/dhuber/University/numerical-training/src/parallel/mpi_module.cc",
+    "output": "/home/dhuber/University/numerical-training/build/objects/src/parallel/mpi_module.o"
+  },
+  {
+    "arguments": [
+      "/usr/lib64/ccache/g++",
+      "-Iinclude/",
+      "-c",
+      "-I/usr/include/openmpi-x86_64",
+      "-o",
+      "build/objects/src/parallel/parallel_damped_jacobi.o",
+      "src/parallel/parallel_damped_jacobi.cc"
+    ],
+    "directory": "/home/dhuber/University/numerical-training",
+    "file": "/home/dhuber/University/numerical-training/src/parallel/parallel_damped_jacobi.cc",
+    "output": "/home/dhuber/University/numerical-training/build/objects/src/parallel/parallel_damped_jacobi.o"
+  },
+  {
+    "arguments": [
+      "/usr/lib64/ccache/g++",
+      "-Iinclude/",
+      "-c",
+      "-I/usr/include/openmpi-x86_64",
+      "-o",
+      "build/objects/src/parallel/parallel_gauss_seidel.o",
+      "src/parallel/parallel_gauss_seidel.cc"
+    ],
+    "directory": "/home/dhuber/University/numerical-training",
+    "file": "/home/dhuber/University/numerical-training/src/parallel/parallel_gauss_seidel.cc",
+    "output": "/home/dhuber/University/numerical-training/build/objects/src/parallel/parallel_gauss_seidel.o"
+  },
+  {
+    "arguments": [
+      "/usr/lib64/ccache/g++",
+      "-Iinclude/",
+      "-c",
+      "-I/usr/include/openmpi-x86_64",
+      "-o",
+      "build/objects/src/serial/serial_damped_jacobi.o",
+      "src/serial/serial_damped_jacobi.cc"
+    ],
+    "directory": "/home/dhuber/University/numerical-training",
+    "file": "/home/dhuber/University/numerical-training/src/serial/serial_damped_jacobi.cc",
+    "output": "/home/dhuber/University/numerical-training/build/objects/src/serial/serial_damped_jacobi.o"
+  },
+  {
+    "arguments": [
+      "/usr/lib64/ccache/g++",
+      "-Iinclude/",
+      "-c",
+      "-I/usr/include/openmpi-x86_64",
+      "-o",
+      "build/objects/src/serial/serial_gauss_seidel.o",
+      "src/serial/serial_gauss_seidel.cc"
+    ],
+    "directory": "/home/dhuber/University/numerical-training",
+    "file": "/home/dhuber/University/numerical-training/src/serial/serial_gauss_seidel.cc",
+    "output": "/home/dhuber/University/numerical-training/build/objects/src/serial/serial_gauss_seidel.o"
   }
 ]

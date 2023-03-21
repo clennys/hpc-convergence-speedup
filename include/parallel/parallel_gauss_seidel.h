@@ -1,7 +1,7 @@
-#ifndef GAUSS_SEIDEL_H_
-#define GAUSS_SEIDEL_H_
+#ifndef PARALLEL_GAUSS_SEIDEL_H_
+#define PARALLEL_GAUSS_SEIDEL_H_
 
-#include "../include/param.h"
+#include "../inputs/param.h"
 
 void gauss_seidel_setup(double *mat, double *sub_mat, double *x_init,
                         double *x_new, double *b, param p);
@@ -17,4 +17,4 @@ void gauss_seidel_step(double *mat, double *sub_mat, double *x, double *b,
 void gauss_seidel(double *mat, double *x, double *b, param p);
 
 bool gauss_seidel_terminate(double *r, double *x, param p);
-#endif // !GAUSS_SEIDEL_H_
+#endif // !PARALLEL_GAUSS_SEIDEL_H_

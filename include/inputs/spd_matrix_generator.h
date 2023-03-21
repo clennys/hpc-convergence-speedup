@@ -1,7 +1,7 @@
-#ifndef SPD_MATRIX
-#define SPD_MATRIX
+#ifndef SPD_MATRIX_H_
+#define SPD_MATRIX_H_
 
-#include "util.h"
+#include "../helpers/util.h"
 #include <cstdlib>
 #include <iostream>
 using namespace std;
@@ -81,4 +81,4 @@ template <typename T> void vector_x_generator(T *vector, int dim, bool rd) {
   dynamically allocated memory */
 template <typename T> void free_spd_matrix(T *matrix) { free(matrix); }
 
-#endif // !SPD_MATRIX
+#endif // !SPD_MATRIX_H_

@@ -1,5 +1,5 @@
-#ifndef UTIL
-#define UTIL
+#ifndef UTIL_H_
+#define UTIL_H_
 
 #include <iostream>
 using namespace std;
@@ -37,4 +37,4 @@ template <typename T> void zero_matrix_init(T *matrix, int m, int n) {
   }
 }
 
-#endif // !UTIL
+#endif // !UTIL_H_

@@ -1,4 +1,4 @@
-#include "../include/param.h"
+#include "../../include/inputs/param.h"
 #include <cassert>
 #include <fstream>
 #include <iostream>

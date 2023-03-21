@@ -1,4 +1,4 @@
-#include "../include/mpi_module.h"
+#include "../../include/parallel/mpi_module.h"
 #include "mpi.h"
 #include <iostream>
 

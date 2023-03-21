@@ -1,8 +1,8 @@
-#include "../include/mpi_module.h"
-#include "../include/param.h"
-#include "../include/spd_matrix_generator.h"
-#include "../include/util.h"
-#include "gauss_seidel.h"
+#include "../../include/helpers/util.h"
+#include "../../include/inputs/param.h"
+#include "../../include/inputs/spd_matrix_generator.h"
+#include "../../include/parallel/mpi_module.h"
+#include "../../include/parallel/parallel_gauss_seidel.h"
 #include "mpi.h"
 #include <cstdlib>
 #include <cstring>

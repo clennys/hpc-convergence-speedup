@@ -6,7 +6,12 @@ OBJ_DIR	= $(BUILD)/objects
 APP_DIR	= $(BUILD)/apps
 TARGET	= main
 INCLUDE	= -Iinclude/
-SRC		= $(wildcard src/*.cc)
+SRC		= \
+	$(wildcard src/*.cc) \
+	$(wildcard src/inputs/*.cc) \
+	$(wildcard src/parallel/*.cc) \
+	$(wildcard src/serial/*.cc) \
+
 
 OBJECTS	= $(SRC:%.cc=$(OBJ_DIR)/%.o)
 DEPENDENCIES \
