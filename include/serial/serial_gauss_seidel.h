@@ -1,4 +1,0 @@
-#ifndef SERIAL_GAUSS_SEIDEL_H_
-#define SERIAL_GAUSS_SEIDEL_H_
-
-#endif // !SERIAL_GAUSS_SEIDEL_H_

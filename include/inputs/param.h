@@ -5,12 +5,14 @@
 using namespace std;
 
 struct param {
-  int mat_dim;
-  int block_length;
-  int my_rank;
-  int size;
-  double omega;
-  double epsilon;
+  int grid_dim;       // dimension of grid
+  int block_length;   // size of submatrix
+  int my_rank;        // rank of process
+  int size;           // nunber of processes
+  double omega;       // damping parameter
+  double epsilon;     // error interval
+  double step_size_h; // h in notes
+  int matrix_dim;     // dimension of matrix
 
   param(int my_rank, int size);
 

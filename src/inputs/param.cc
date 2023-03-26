@@ -9,17 +9,19 @@ param::param(int my_rank, int size) : my_rank(my_rank), size(size) {}
 
 void param::read_param_from_file(string file) {
   double omega, epsilon;
-  int mat_dim;
+  int grid_dim;
   ifstream ifs(file);
   ifs >> omega;
-  ifs >> mat_dim;
+  ifs >> grid_dim;
   ifs >> epsilon;
 
-  assert((void("Matrix not split up evenly -> MPIScatter,MPIGather fails"),
-          mat_dim % this->size == 0));
-
   this->omega = omega;
-  this->mat_dim = mat_dim;
-  this->block_length = mat_dim / this->size;
+  this->grid_dim = grid_dim;
+  this->matrix_dim = (grid_dim - 1) * (grid_dim - 1);
+  this->block_length = matrix_dim / this->size;
   this->epsilon = epsilon;
+  this->step_size_h = 1.0 / grid_dim;
+
+  assert((void("Matrix not split up evenly -> MPIScatter,MPIGather fails"),
+          matrix_dim % this->size == 0));
 }

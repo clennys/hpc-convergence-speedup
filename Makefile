@@ -1,5 +1,5 @@
 CXX		= mpicxx
-# CXXFLAGS= -pedantic-errors -Wall -Wextra -Werror
+# CXXFLAGS= -pedantic-errors -Wall -Wextra
 LDFLAGS	=
 BUILD	= ./build
 OBJ_DIR	= $(BUILD)/objects
@@ -9,8 +9,8 @@ INCLUDE	= -Iinclude/
 SRC		= \
 	$(wildcard src/*.cc) \
 	$(wildcard src/inputs/*.cc) \
-	$(wildcard src/parallel/*.cc) \
-	$(wildcard src/serial/*.cc) \
+	$(wildcard src/helpers/*.cc) \
+	$(wildcard src/iterative_solvers/*.cc) \
 
 
 OBJECTS	= $(SRC:%.cc=$(OBJ_DIR)/%.o)
