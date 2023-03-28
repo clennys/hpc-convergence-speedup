@@ -1,7 +1,7 @@
 #ifndef GAUSS_SEIDEL_H_
 #define GAUSS_SEIDEL_H_
 
-#include "../inputs/param.h"
+#include "../../inputs/param.h"
 
 namespace gauss_seidel {
 namespace parallel {

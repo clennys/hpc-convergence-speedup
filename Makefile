@@ -11,6 +11,7 @@ SRC		= \
 	$(wildcard src/inputs/*.cc) \
 	$(wildcard src/helpers/*.cc) \
 	$(wildcard src/iterative_solvers/*.cc) \
+	$(wildcard src/iterative_solvers/methods/*.cc) \
 
 
 OBJECTS	= $(SRC:%.cc=$(OBJ_DIR)/%.o)

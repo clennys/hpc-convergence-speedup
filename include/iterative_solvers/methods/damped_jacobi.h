@@ -1,9 +1,10 @@
 #ifndef DAMPED_JACOBI_H_
 #define DAMPED_JACOBI_H_
 
-#include "../inputs/param.h"
+#include "../../inputs/param.h"
 
 namespace damped_jacobi {
+
 namespace parallel {
 void run(double *mat, double *x, double *b, param p);
 void step(double *sub_mat, double *x, double *b, double *x_new, param p);
@@ -12,8 +13,15 @@ void calc_xnew(double *sub_mat, double *x, double *b, double *x_new, param p);
 void calc_r(double *sub_mat, double *x, double *b, double *r_local,
             double *r_gathered, param p);
 bool stopping_criterion(double *r, double *x, param p);
-
 } // namespace parallel
-namespace serial {}
+
+namespace serial {
+
+void step(double *x_new, double *matrix, double *b, double *x, param p);
+bool stopping_criterion(double *matrix, double *x, double *b, double *r,
+                        param p);
+void run(double *matrix, double *x, double *b, param p);
+}; // namespace serial
+
 } // namespace damped_jacobi
 #endif // !DAMPED_JACOBI_H_

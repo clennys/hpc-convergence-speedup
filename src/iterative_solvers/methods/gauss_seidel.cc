@@ -1,7 +1,7 @@
-#include "../../include/iterative_solvers/gauss_seidel.h"
-#include "../../include/helpers/mpi_module.h"
-#include "../../include/helpers/util.h"
-#include "../../include/inputs/param.h"
+#include "../../../include/iterative_solvers/methods/gauss_seidel.h"
+#include "../../../include/helpers/mpi_module.h"
+#include "../../../include/helpers/util.h"
+#include "../../../include/inputs/param.h"
 #include "mpi.h"
 #include <iostream>
 #include <math.h>
@@ -76,6 +76,7 @@ bool stopping_criterion(double *r, double *x, param p) {
     norm_x += x[i] * x[i];
     norm_r += r[i] * r[i];
   }
+  // TODO use abs()
   double diff = sqrt(norm_r) / sqrt(norm_x);
   diff = diff > 0 ? diff : -diff;
   cout << "DIFF: " << diff << endl;

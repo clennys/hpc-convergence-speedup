@@ -1,12 +1,13 @@
-#include "../../include/iterative_solvers/damped_jacobi.h"
-#include "../../include/helpers/mpi_module.h"
-#include "../../include/helpers/util.h"
-#include "../../include/inputs/param.h"
-#include "../../include/iterative_solvers/gauss_seidel.h"
+#include "../../../include/iterative_solvers/methods/damped_jacobi.h"
+#include "../../../include/helpers/mpi_module.h"
+#include "../../../include/helpers/util.h"
+#include "../../../include/inputs/param.h"
+#include "../../../include/iterative_solvers/methods/gauss_seidel.h"
 #include "mpi.h"
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
+#include <math.h>
 
 using namespace std;
 
@@ -88,6 +89,45 @@ void run(double *mat, double *x, double *b, param p) {
 }
 } // namespace parallel
 
-namespace serial {}
+namespace serial {
+void step(double *x_new, double *matrix, double *b, double *x, param p) {
+  double sum;
+  for (int i = 0; i < p.matrix_dim; i++) {
+    sum = 0;
+    for (int j = 0; j < p.matrix_dim; j++) {
+      sum += matrix[i * p.matrix_dim + j] * x[j];
+    }
+    x_new[i] = x[i] - (p.omega / matrix[i * p.matrix_dim + i] * (sum - b[i]));
+  }
+}
+
+bool stopping_criterion(double *matrix, double *x, double *b, double *r,
+                        param p) {
+  matrix_multiplication(r, matrix, x, p.matrix_dim, p.matrix_dim, 1);
+  double norm_x = 0;
+  double norm_r = 0;
+  for (int i = 0; i < p.matrix_dim; i++) {
+    r[i] -= x[i];
+    norm_x += x[i] * x[i];
+    norm_r += r[i] * r[i];
+  }
+  double diff = abs(sqrt(norm_r) / sqrt(norm_x));
+  if (diff < p.epsilon) {
+    return true;
+  }
+  return false;
+}
+void run(double *matrix, double *x, double *b, param p) {
+  double *x_new = new double[p.matrix_dim];
+  double *r = new double[p.matrix_dim];
+  while (stopping_criterion(matrix, x, b, r, p)) {
+    step(x_new, matrix, b, x, p);
+    double *tmp;
+    tmp = x_new;
+    x_new = x;
+    x = tmp;
+  }
+};
+}; // namespace serial
 
 } // namespace damped_jacobi

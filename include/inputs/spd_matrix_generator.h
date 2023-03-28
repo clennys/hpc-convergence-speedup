@@ -18,32 +18,6 @@ template <typename T> void transpose_matrix(T *matrix, T *transpose, int dim) {
   }
 }
 
-template <typename T>
-void matrix_multiplication(T *result, T *matrix, T *matrix0, int dim) {
-  zero_matrix_init(result, dim, dim);
-
-  for (int i = 0; i < dim; ++i) {
-    for (int j = 0; j < dim; ++j) {
-      for (int k = 0; k < dim; ++k) {
-        result[i * dim + j] += matrix[i * dim + k] * matrix0[k * dim + j];
-      }
-    }
-  }
-}
-
-template <typename T>
-void matrix_multiplication(T *result, T *matrix, T *matrix0, int m, int n,
-                           int p) {
-  zero_matrix_init(result, m, p);
-  for (int i = 0; i < m; ++i) {
-    for (int j = 0; j < p; ++j) {
-      for (int k = 0; k < n; ++k) {
-        result[i * p + j] += matrix[i * n + k] * matrix0[k * p + j];
-      }
-    }
-  }
-}
-
 template <typename T> void spd_matrix_generator(T *result, int dim, bool rd) {
   double *matrix = new double[dim * dim];
   double *transpose = new double[dim * dim];
