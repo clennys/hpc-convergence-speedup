@@ -11,7 +11,7 @@
 #include <cstring>
 #include <iostream>
 
-void run_parallel(char *opts) {
+void run_parallel(char *solver, char *grid) {
   int size, my_rank;
 
   double *b, *b_check;
@@ -23,7 +23,6 @@ void run_parallel(char *opts) {
   if (my_rank == ROOT_PROC) {
     cout << "===== Parallel Computing =====" << endl;
   }
-
   param p(my_rank, size);
   p.read_param_from_file("input.txt");
 
@@ -33,17 +32,28 @@ void run_parallel(char *opts) {
   if (my_rank == ROOT_PROC) {
     zero_matrix_init(x, p.matrix_dim, 1);
     matrix = new double[p.matrix_dim * p.matrix_dim];
-    discretized_grid::five_point_stencil(matrix, b, p);
+    if (strcmp(grid, "-fps") == 0) {
+      cout << "===== Using Five-Point-Stencil =====" << endl;
+      discretized_grid::five_point_stencil(matrix, b, p);
+    } else if (strcmp(grid, "-nps") == 0) {
+      cout << "===== Using Nine-Point-Stencil =====" << endl;
+      discretized_grid::nine_point_stencil(matrix, b, p);
+    } else {
+      cout << "Select parallel Discretize method!" << endl;
+      exit(1);
+    }
+
     print_matrix(matrix, p.matrix_dim);
+    print_vector(b, p.matrix_dim);
   }
 
   double start = MPI_Wtime();
-  if (strcmp(opts, "-dj") == 0) {
+  if (strcmp(solver, "-dj") == 0) {
     if (my_rank == ROOT_PROC) {
       cout << "===== Executing Damped Jacobi =====" << endl;
     }
     damped_jacobi::parallel::run(matrix, x, b, p);
-  } else if (strcmp(opts, "-gs") == 0) {
+  } else if (strcmp(solver, "-gs") == 0) {
     if (my_rank == ROOT_PROC) {
       cout << "===== Executing Gauss-Seidel  =====" << endl;
     }
@@ -51,22 +61,27 @@ void run_parallel(char *opts) {
   } else {
     if (my_rank == ROOT_PROC) {
       cout << "Select Method for parallel computation!" << endl;
+      exit(1);
     }
   }
   double end = MPI_Wtime();
 
+  double elapsed = end - start;
+
   if (ROOT_PROC == my_rank) {
     cout << endl << "Solution for x is: " << endl;
     print_vector(x, p.matrix_dim);
+
     cout << endl << "b is: " << endl;
     print_vector(b, p.matrix_dim);
-    cout << "The process took " << end - start << " seconds to run." << endl;
 
     cout << endl << "b_check is: " << endl;
     b_check = new double[p.matrix_dim];
     matrix_multiplication(b_check, matrix, x, p.matrix_dim, p.matrix_dim, 1);
     print_vector(b_check, p.matrix_dim);
+
+    cout << "The process took " << elapsed << " seconds to run." << endl;
   }
 
   finish_MPI();
-};
+}

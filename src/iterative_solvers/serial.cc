@@ -9,17 +9,19 @@
 
 #include "mpi.h"
 #include <cassert>
+#include <chrono>
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
 
 using namespace std;
+using namespace std::chrono;
 
-void run_serial(char *opts) {
+void run_serial(char *solver, char *grid) {
   cout << "===== Serial Computing =====" << endl;
   double *b, *b_check;
   double *matrix;
-  double *x; //*x_true;
+  double *x;
 
   param p(0, 1);
   p.read_param_from_file("input.txt");
@@ -28,27 +30,43 @@ void run_serial(char *opts) {
   x = new double[p.matrix_dim];
   matrix = new double[p.matrix_dim * p.matrix_dim];
   zero_matrix_init(x, p.matrix_dim, 1);
-  discretized_grid::five_point_stencil(matrix, b, p);
+
+  if (strcmp(grid, "-fps") == 0) {
+    cout << "===== Using Five-Point-Stencil =====" << endl;
+    discretized_grid::five_point_stencil(matrix, b, p);
+  } else if (strcmp(grid, "-nps") == 0) {
+    cout << "===== Using Nine-Point-Stencil =====" << endl;
+    discretized_grid::nine_point_stencil(matrix, b, p);
+  } else {
+    cout << "Select Serial Destretize Method!" << endl;
+  }
+
   print_matrix(matrix, p.matrix_dim);
 
-  if (strcmp(opts, "-dj") == 0) {
+  auto start = high_resolution_clock::now();
+  if (strcmp(solver, "-dj") == 0) {
     cout << "===== Executing Damped Jacobi =====" << endl;
-    cout << "here";
     damped_jacobi::serial::run(matrix, x, b, p);
-  } else if (strcmp(opts, "-gs") == 0) {
+  } else if (strcmp(solver, "-gs") == 0) {
     cout << "===== Executing Gauss-Seidel  =====" << endl;
-    // gauss_seidel::serial::run(matrix, x, b, p);
+    gauss_seidel::serial::run(matrix, x, b, p);
   } else {
-    cout << "Select Method!" << endl;
+    cout << "Select Method for serial computation!" << endl;
   }
+  auto end = high_resolution_clock::now();
+
+  auto elapsed = duration_cast<nanoseconds>(end - start);
+
   cout << endl << "Solution for x is: " << endl;
   print_vector(x, p.matrix_dim);
   cout << endl << "b is: " << endl;
   print_vector(b, p.matrix_dim);
-  // cout << "The process took " << end - start << " seconds to run." << endl;
 
   cout << endl << "b_check is: " << endl;
   b_check = new double[p.matrix_dim];
   matrix_multiplication(b_check, matrix, x, p.matrix_dim, p.matrix_dim, 1);
   print_vector(b_check, p.matrix_dim);
+
+  cout << "The process took " << elapsed.count() * 1e-9 << " seconds to run."
+       << endl;
 };

@@ -19,7 +19,9 @@ void run(double *mat, double *x, double *b, param p);
 bool stopping_criterion(double *r, double *x, param p);
 
 } // namespace parallel
-namespace serial {}
+namespace serial {
+void run(double *matrix, double *x, double *b, param p);
+}
 
 } // namespace gauss_seidel
 

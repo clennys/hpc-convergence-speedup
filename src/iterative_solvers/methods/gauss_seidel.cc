@@ -76,10 +76,9 @@ bool stopping_criterion(double *r, double *x, param p) {
     norm_x += x[i] * x[i];
     norm_r += r[i] * r[i];
   }
-  // TODO use abs()
   double diff = sqrt(norm_r) / sqrt(norm_x);
   diff = diff > 0 ? diff : -diff;
-  cout << "DIFF: " << diff << endl;
+  cout << "diff: " << diff << " epsilon: " << p.epsilon << endl;
   if (diff < p.epsilon) {
     return true;
   }
@@ -114,6 +113,61 @@ void run(double *mat, double *x, double *b, param p) {
   }
 }
 } // namespace parallel
-namespace serial {}
+namespace serial {
+void calc_r(double *matrix, double *x, double *b, double *r, param p) {
+  double sum;
+  for (int i = 0; i < p.matrix_dim; i++) {
+    sum = 0;
+    for (int j = 0; j < p.matrix_dim; j++) {
+      sum += matrix[i * p.matrix_dim + j] * x[j];
+    }
+    r[i] = sum - b[i];
+  }
+}
+
+void step(double *x_new, double *matrix, double *b, double *x, double *r,
+          double *y, param p) {
+
+  calc_r(matrix, x, b, r, p);
+
+  gauss_seidel::parallel::forward_substitution(matrix, r, y, p.matrix_dim);
+
+  for (int i = 0; i < p.block_length; i++) {
+    x_new[i] = x[i] - y[i];
+  }
+}
+
+bool stopping_criterion(double *matrix, double *x, double *b, double *r,
+                        param p) {
+
+  double norm_x = 0;
+  double norm_r = 0;
+
+  for (int i = 0; i < p.matrix_dim; i++) {
+    norm_x += x[i] * x[i];
+    norm_r += r[i] * r[i];
+  }
+  double diff = sqrt(norm_r) / sqrt(norm_x);
+  diff = diff > 0 ? diff : -diff;
+  cout << "diff: " << diff << " epsilon: " << p.epsilon << endl;
+  if (diff < p.epsilon) {
+    return false;
+  }
+  return true;
+}
+
+void run(double *matrix, double *x, double *b, param p) {
+  double *x_new = new double[p.matrix_dim];
+  double *r = new double[p.matrix_dim];
+  double *y = new double[p.matrix_dim];
+  do {
+    step(x_new, matrix, b, x, r, y, p);
+    double *tmp;
+    tmp = x_new;
+    x_new = x;
+    x = tmp;
+  } while (stopping_criterion(matrix, x, b, r, p));
+}
+} // namespace serial
 
 } // namespace gauss_seidel
