@@ -17,13 +17,13 @@
 using namespace std;
 using namespace std::chrono;
 
-void run_serial(char *solver, char *grid) {
+void run_serial(char *solver, char *x_point_formula, int grid_dim) {
   cout << "===== Serial Computing =====" << endl;
   double *b, *b_check;
   double *matrix;
   double *x;
 
-  param p(0, 1);
+  param p(0, 1, grid_dim);
   p.read_param_from_file("input.txt");
 
   b = new double[p.matrix_dim];
@@ -31,10 +31,10 @@ void run_serial(char *solver, char *grid) {
   matrix = new double[p.matrix_dim * p.matrix_dim];
   zero_matrix_init(x, p.matrix_dim, 1);
 
-  if (strcmp(grid, "-fps") == 0) {
+  if (strcmp(x_point_formula, "-fps") == 0) {
     cout << "===== Using Five-Point-Stencil =====" << endl;
     discretized_grid::five_point_stencil(matrix, b, p);
-  } else if (strcmp(grid, "-nps") == 0) {
+  } else if (strcmp(x_point_formula, "-nps") == 0) {
     cout << "===== Using Nine-Point-Stencil =====" << endl;
     discretized_grid::nine_point_stencil(matrix, b, p);
   } else {

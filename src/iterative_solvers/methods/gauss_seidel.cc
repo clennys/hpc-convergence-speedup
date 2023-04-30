@@ -20,26 +20,26 @@ void setup(double *mat, double *sub_mat, double *x_init, double *x_new,
 
 void calc_r(double *sub_mat, double *x, double *b, double *r_local, param p) {
   double sum;
-  for (int i = 0; i < p.block_length; i++) {
+  for (int i = 0; i < p.rank_block_length; i++) {
     sum = 0;
-    for (int j = 0; j < p.matrix_dim; j++) {
+    for (int j = 0; j < p.matrix_dim_no_empty_rows; j++) {
       sum += sub_mat[i * p.matrix_dim + j] * x[j];
     }
     r_local[i] = sum - b[p.my_rank * p.block_length + i];
   }
 }
 
-void forward_substitution(double *mat_GS, double *r, double *y, int mat_dim) {
+void forward_substitution(double *mat_GS, double *r, double *y, param p) {
 
   // zeros_matrix(y, mat_dim, 1);
   y[0] = r[0] / mat_GS[0];
   double sum;
-  for (int i = 1; i < mat_dim; i++) {
+  for (int i = 1; i < p.matrix_dim_no_empty_rows; i++) {
     sum = 0;
     for (int j = 0; j < i; j++) {
-      sum += mat_GS[i * mat_dim + j] * y[j];
+      sum += mat_GS[i * p.matrix_dim + j] * y[j];
     }
-    y[i] = (r[i] - sum) / mat_GS[i * mat_dim + i];
+    y[i] = (r[i] - sum) / mat_GS[i * p.matrix_dim + i];
   }
 }
 
@@ -53,14 +53,14 @@ void step(double *mat, double *sub_mat, double *x, double *b, double *r_local,
              MPI_DOUBLE, ROOT_PROC, MPI_COMM_WORLD);
 
   if (p.my_rank == ROOT_PROC) {
-    forward_substitution(mat, r_gathered, y_scatter, p.matrix_dim);
+    forward_substitution(mat, r_gathered, y_scatter, p);
   }
 
   MPI_Barrier(MPI_COMM_WORLD);
 
   MPI_Scatter(y_scatter, p.block_length, MPI_DOUBLE, y_local, p.block_length,
               MPI_DOUBLE, ROOT_PROC, MPI_COMM_WORLD);
-  for (int i = 0; i < p.block_length; i++) {
+  for (int i = 0; i < p.rank_block_length; i++) {
     x_new[i] = x[p.my_rank * p.block_length + i] - y_local[i];
   }
 
@@ -72,7 +72,7 @@ bool stopping_criterion(double *r, double *x, param p) {
   double norm_r = 0;
   double norm_x = 0;
 
-  for (int i = 0; i < p.matrix_dim; i++) {
+  for (int i = 0; i < p.matrix_dim_no_empty_rows; i++) {
     norm_x += x[i] * x[i];
     norm_r += r[i] * r[i];
   }
@@ -130,7 +130,7 @@ void step(double *x_new, double *matrix, double *b, double *x, double *r,
 
   calc_r(matrix, x, b, r, p);
 
-  gauss_seidel::parallel::forward_substitution(matrix, r, y, p.matrix_dim);
+  gauss_seidel::parallel::forward_substitution(matrix, r, y, p);
 
   for (int i = 0; i < p.block_length; i++) {
     x_new[i] = x[i] - y[i];

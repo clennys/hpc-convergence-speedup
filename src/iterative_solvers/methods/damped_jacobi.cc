@@ -27,9 +27,9 @@ void setup(double *mat, double *x_init, double *b, double *sub_mat, param p) {
 void calc_xnew(double *sub_mat, double *x, double *b, double *x_new, param p) {
   double sum;
 
-  for (int i = 0; i < p.block_length; i++) {
+  for (int i = 0; i < p.rank_block_length; i++) {
     sum = 0;
-    for (int j = 0; j < p.matrix_dim; j++) {
+    for (int j = 0; j < p.matrix_dim_no_empty_rows; j++) {
       sum += sub_mat[i * p.matrix_dim + j] * x[j];
     }
 

@@ -9,7 +9,7 @@ void setup(double *mat, double *sub_mat, double *x_init, double *x_new,
            double *b, param p);
 void calc_r(double *sub_mat, double *x, double *b, double *r_local, param p);
 
-void forward_substitution(double *mat_GS, double *r, double *y, int mat_dim);
+void forward_substitution(double *mat_GS, double *r, double *y, param p);
 
 void step(double *mat, double *sub_mat, double *x, double *b, double *r_local,
           double *r_gathered, double *y_scatter, double *y_local, double *x_new,

@@ -11,7 +11,7 @@
 #include <cstring>
 #include <iostream>
 
-void run_parallel(char *solver, char *grid) {
+void run_parallel(char *solver, char *x_point_formula, int grid_size) {
   int size, my_rank;
 
   double *b, *b_check;
@@ -23,7 +23,7 @@ void run_parallel(char *solver, char *grid) {
   if (my_rank == ROOT_PROC) {
     cout << "===== Parallel Computing =====" << endl;
   }
-  param p(my_rank, size);
+  param p(my_rank, size, grid_size);
   p.read_param_from_file("input.txt");
 
   b = new double[p.matrix_dim];
@@ -32,10 +32,10 @@ void run_parallel(char *solver, char *grid) {
   if (my_rank == ROOT_PROC) {
     zero_matrix_init(x, p.matrix_dim, 1);
     matrix = new double[p.matrix_dim * p.matrix_dim];
-    if (strcmp(grid, "-fps") == 0) {
+    if (strcmp(x_point_formula, "-fps") == 0) {
       cout << "===== Using Five-Point-Stencil =====" << endl;
       discretized_grid::five_point_stencil(matrix, b, p);
-    } else if (strcmp(grid, "-nps") == 0) {
+    } else if (strcmp(x_point_formula, "-nps") == 0) {
       cout << "===== Using Nine-Point-Stencil =====" << endl;
       discretized_grid::nine_point_stencil(matrix, b, p);
     } else {

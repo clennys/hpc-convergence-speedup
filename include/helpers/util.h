@@ -38,6 +38,13 @@ template <typename T> void zero_matrix_init(T *matrix, int m, int n) {
     }
   }
 }
+template <typename T> void ones_matrix_init(T *matrix, int m, int n) {
+  for (int i = 0; i < m; i++) {
+    for (int j = 0; j < n; j++) {
+      matrix[i * n + j] = 1;
+    }
+  }
+}
 
 template <typename T>
 void matrix_multiplication(T *result, T *matrix, T *matrix0, int dim) {

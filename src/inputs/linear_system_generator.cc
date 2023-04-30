@@ -59,30 +59,53 @@ void five_point_stencil(double *A, double *b, param p) {
   }
 }
 
-// 1/36 * [[1/2 1 1/2], [1 4 1], [1/2 1 1/2]]
 void nine_point_stencil(double *A, double *b, param p) {
   zero_matrix_init(A, p.matrix_dim, p.matrix_dim);
-  double factor = 1.0 / 36;
+  zero_matrix_init(b, p.matrix_dim, 1);
 
-  for (int i = 0; i < p.matrix_dim; i++) {
-    switch (i % 3) {
-    case 0:
-      A[i * p.matrix_dim + i] = factor * 0.5;
-      A[i * p.matrix_dim + i + 1] = factor;
-      A[i * p.matrix_dim + i + 2] = factor * 0.5;
-      break;
-    case 1:
-      A[i * p.matrix_dim + i - 1] = factor;
-      A[i * p.matrix_dim + i] = factor * 4;
-      A[i * p.matrix_dim + i + 1] = factor;
-      break;
-    case 2:
-      A[i * p.matrix_dim + i - 2] = factor * 0.5;
-      A[i * p.matrix_dim + i - 1] = factor;
-      A[i * p.matrix_dim + i] = factor * 0.5;
-      break;
-    default:
-      break;
+  double T_lower_upper_diagonal = 1.0 / 4;
+  double T_diagonal = 4.0 / 9;
+
+  double M_lower_upper_diagonal = 1.0 / 36;
+  double M_diagonal = T_lower_upper_diagonal;
+
+  int nr_block_matrices_rows = p.matrix_dim / (p.grid_dim - 1);
+  for (int i = 0; i < p.matrix_dim; i += nr_block_matrices_rows) {
+
+    // diagonal
+    for (int j = 0; j < nr_block_matrices_rows; j++) {
+      int k = i + j;
+      A[k * p.matrix_dim + k] = T_diagonal;
+      if (j < nr_block_matrices_rows - 1)
+        A[k * p.matrix_dim + k + 1] = T_lower_upper_diagonal;
+      if (j > 0)
+        A[k * p.matrix_dim + k - 1] = T_lower_upper_diagonal;
+    }
+
+    // lower diagonal
+    if (i > 0) {
+      for (int j = 0; j < nr_block_matrices_rows; j++) {
+        int l = i + j - nr_block_matrices_rows;
+        int k = i + j;
+        A[k * p.matrix_dim + l] = M_diagonal;
+        if (j < nr_block_matrices_rows - 1)
+          A[k * p.matrix_dim + l + 1] = M_lower_upper_diagonal;
+        if (j > 0)
+          A[k * p.matrix_dim + l - 1] = M_lower_upper_diagonal;
+      }
+    }
+
+    // upper diagonal
+    if (i < p.matrix_dim - nr_block_matrices_rows) {
+      for (int j = 0; j < nr_block_matrices_rows; j++) {
+        int u = i + j + nr_block_matrices_rows;
+        int k = i + j;
+        A[k * p.matrix_dim + u] = M_diagonal;
+        if (j < nr_block_matrices_rows - 1)
+          A[k * p.matrix_dim + u + 1] = M_lower_upper_diagonal;
+        if (j > 0)
+          A[k * p.matrix_dim + u - 1] = M_lower_upper_diagonal;
+      }
     }
   }
 
@@ -90,10 +113,7 @@ void nine_point_stencil(double *A, double *b, param p) {
   double h_squared = p.step_size_h * p.step_size_h;
   for (int j = 1; j < p.grid_dim; j++) {
     for (int i = 1; i < p.grid_dim; i++) {
-      b[k] = 4 * h_squared * f_nine_point(j * p.step_size_h, j * p.step_size_h);
-      cout << b[k] << " :: " << h_squared << " :: j " << j << " :: i " << i
-           << " :: " << f_nine_point(i * p.step_size_h, j * p.step_size_h)
-           << endl;
+      b[k] = 4 * h_squared * f_nine_point(i * p.step_size_h, j * p.step_size_h);
       k++;
     }
   }
