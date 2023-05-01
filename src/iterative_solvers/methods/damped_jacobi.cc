@@ -58,15 +58,15 @@ bool stopping_criterion(double *r, double *x, param p) {
   return gauss_seidel::parallel::stopping_criterion(r, x, p);
 }
 
-void run(double *mat, double *x, double *b, param p) {
+int run(double *mat, double *x, double *b, param p) {
   double x_new[p.block_length];
   double sub_mat[p.block_length * p.matrix_dim];
   double r_local[p.block_length], r_gathered[p.matrix_dim];
 
   setup(mat, x, b, sub_mat, p);
 
-  int count = 0;
   int continues = 1;
+  int counter = 0;
   while (true) {
     step(sub_mat, x, b, x_new, p);
     calc_r(sub_mat, x, b, r_local, r_gathered, p);
@@ -81,11 +81,11 @@ void run(double *mat, double *x, double *b, param p) {
     MPI_Bcast(&continues, 1, MPI_INT, ROOT_PROC, MPI_COMM_WORLD);
 
     if (continues == 0) {
-      return;
+      return counter;
     }
-
-    count++;
+    counter++;
   }
+  return -1;
 }
 } // namespace parallel
 
@@ -131,16 +131,19 @@ bool stopping_criterion(double *matrix, double *x, double *b, double *r,
   }
   return true;
 }
-void run(double *matrix, double *x, double *b, param p) {
+int run(double *matrix, double *x, double *b, param p) {
   double *x_new = new double[p.matrix_dim];
   double *r = new double[p.matrix_dim];
+  int counter = 0;
   do {
     step(x_new, matrix, b, x, p);
     double *tmp;
     tmp = x_new;
     x_new = x;
     x = tmp;
+    counter++;
   } while (stopping_criterion(matrix, x, b, r, p));
+  return counter;
 };
 }; // namespace serial
 

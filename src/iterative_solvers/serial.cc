@@ -17,24 +17,24 @@
 using namespace std;
 using namespace std::chrono;
 
-void run_serial(char *solver, char *x_point_formula, int grid_dim) {
+void run_serial(string solver, string x_point_formula, int grid_dim) {
   cout << "===== Serial Computing =====" << endl;
   double *b, *b_check;
   double *matrix;
   double *x;
 
-  param p(0, 1, grid_dim);
-  p.read_param_from_file("input.txt");
+  param p(0, 1, grid_dim, solver, x_point_formula);
+  p.read("input.txt");
 
   b = new double[p.matrix_dim];
   x = new double[p.matrix_dim];
   matrix = new double[p.matrix_dim * p.matrix_dim];
   zero_matrix_init(x, p.matrix_dim, 1);
 
-  if (strcmp(x_point_formula, "-fps") == 0) {
+  if (x_point_formula == "-fps") {
     cout << "===== Using Five-Point-Stencil =====" << endl;
     discretized_grid::five_point_stencil(matrix, b, p);
-  } else if (strcmp(x_point_formula, "-nps") == 0) {
+  } else if (x_point_formula == "-nps") {
     cout << "===== Using Nine-Point-Stencil =====" << endl;
     discretized_grid::nine_point_stencil(matrix, b, p);
   } else {
@@ -44,12 +44,12 @@ void run_serial(char *solver, char *x_point_formula, int grid_dim) {
   print_matrix(matrix, p.matrix_dim);
 
   auto start = high_resolution_clock::now();
-  if (strcmp(solver, "-dj") == 0) {
+  if (solver == "-dj") {
     cout << "===== Executing Damped Jacobi =====" << endl;
-    damped_jacobi::serial::run(matrix, x, b, p);
-  } else if (strcmp(solver, "-gs") == 0) {
+    p.iterations = damped_jacobi::serial::run(matrix, x, b, p);
+  } else if (solver == "-gs") {
     cout << "===== Executing Gauss-Seidel  =====" << endl;
-    gauss_seidel::serial::run(matrix, x, b, p);
+    p.iterations = gauss_seidel::serial::run(matrix, x, b, p);
   } else {
     cout << "Select Method for serial computation!" << endl;
   }
@@ -67,6 +67,9 @@ void run_serial(char *solver, char *x_point_formula, int grid_dim) {
   matrix_multiplication(b_check, matrix, x, p.matrix_dim, p.matrix_dim, 1);
   print_vector(b_check, p.matrix_dim);
 
+  p.time = elapsed.count() * 1e-9;
+
   cout << "The process took " << elapsed.count() * 1e-9 << " seconds to run."
        << endl;
+  p.write_append_csv("output.csv");
 };

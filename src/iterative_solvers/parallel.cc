@@ -11,7 +11,7 @@
 #include <cstring>
 #include <iostream>
 
-void run_parallel(char *solver, char *x_point_formula, int grid_size) {
+void run_parallel(string solver, string x_point_formula, int grid_size) {
   int size, my_rank;
 
   double *b, *b_check;
@@ -23,8 +23,8 @@ void run_parallel(char *solver, char *x_point_formula, int grid_size) {
   if (my_rank == ROOT_PROC) {
     cout << "===== Parallel Computing =====" << endl;
   }
-  param p(my_rank, size, grid_size);
-  p.read_param_from_file("input.txt");
+  param p(my_rank, size, grid_size, solver, x_point_formula);
+  p.read("input.txt");
 
   b = new double[p.matrix_dim];
   x = new double[p.matrix_dim];
@@ -32,10 +32,10 @@ void run_parallel(char *solver, char *x_point_formula, int grid_size) {
   if (my_rank == ROOT_PROC) {
     zero_matrix_init(x, p.matrix_dim, 1);
     matrix = new double[p.matrix_dim * p.matrix_dim];
-    if (strcmp(x_point_formula, "-fps") == 0) {
+    if (x_point_formula == "-fps") {
       cout << "===== Using Five-Point-Stencil =====" << endl;
       discretized_grid::five_point_stencil(matrix, b, p);
-    } else if (strcmp(x_point_formula, "-nps") == 0) {
+    } else if (x_point_formula == "-nps") {
       cout << "===== Using Nine-Point-Stencil =====" << endl;
       discretized_grid::nine_point_stencil(matrix, b, p);
     } else {
@@ -48,16 +48,16 @@ void run_parallel(char *solver, char *x_point_formula, int grid_size) {
   }
 
   double start = MPI_Wtime();
-  if (strcmp(solver, "-dj") == 0) {
+  if (solver == "-dj") {
     if (my_rank == ROOT_PROC) {
       cout << "===== Executing Damped Jacobi =====" << endl;
     }
-    damped_jacobi::parallel::run(matrix, x, b, p);
-  } else if (strcmp(solver, "-gs") == 0) {
+    p.iterations = damped_jacobi::parallel::run(matrix, x, b, p);
+  } else if (solver == "-gs") {
     if (my_rank == ROOT_PROC) {
       cout << "===== Executing Gauss-Seidel  =====" << endl;
     }
-    gauss_seidel::parallel::run(matrix, x, b, p);
+    p.iterations = gauss_seidel::parallel::run(matrix, x, b, p);
   } else {
     if (my_rank == ROOT_PROC) {
       cout << "Select Method for parallel computation!" << endl;
@@ -67,6 +67,7 @@ void run_parallel(char *solver, char *x_point_formula, int grid_size) {
   double end = MPI_Wtime();
 
   double elapsed = end - start;
+  p.time = elapsed;
 
   if (ROOT_PROC == my_rank) {
     cout << endl << "Solution for x is: " << endl;
@@ -81,6 +82,7 @@ void run_parallel(char *solver, char *x_point_formula, int grid_size) {
     print_vector(b_check, p.matrix_dim);
 
     cout << "The process took " << elapsed << " seconds to run." << endl;
+    p.write_append_csv("output.csv");
   }
 
   finish_MPI();

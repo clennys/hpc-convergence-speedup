@@ -14,13 +14,13 @@ void forward_substitution(double *mat_GS, double *r, double *y, param p);
 void step(double *mat, double *sub_mat, double *x, double *b, double *r_local,
           double *r_gathered, double *y_scatter, double *y_local, double *x_new,
           param p);
-void run(double *mat, double *x, double *b, param p);
+int run(double *mat, double *x, double *b, param p);
 
 bool stopping_criterion(double *r, double *x, param p);
 
 } // namespace parallel
 namespace serial {
-void run(double *matrix, double *x, double *b, param p);
+int run(double *matrix, double *x, double *b, param p);
 }
 
 } // namespace gauss_seidel

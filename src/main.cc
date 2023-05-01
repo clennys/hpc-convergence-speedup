@@ -7,21 +7,21 @@ using namespace std;
 
 int main(int argc, char *argv[]) {
   if (argc < 7) {
-    if (strcmp(argv[1], "-s") == 0) {
-      if (strcmp(argv[4], "-gd") == 0) {
+    if (string(argv[1]) == "-s") {
+      if (string(argv[4]) == "-gd") {
         run_serial(argv[2], argv[3], atoi(argv[5]));
       } else {
         cout << "Specify grid dimension" << endl;
         exit(1);
       }
-    } else if (strcmp(argv[1], "-p") == 0) {
-      if (strcmp(argv[4], "-gd") == 0) {
+    } else if (string(argv[1]) == "-p") {
+      if (string(argv[4]) == "-gd") {
         run_parallel(argv[2], argv[3], atoi(argv[5]));
       } else {
         cout << "Specify grid dimension" << endl;
         exit(1);
       }
-    } else if (strcmp(argv[1], "-h") == 0) {
+    } else if (string(argv[1]) == "-h") {
       cout << "TODO INSTRUCTIONS" << endl;
     } else {
       cout << "Select Computing Mode with -p (parallel) or -s (serial)!"

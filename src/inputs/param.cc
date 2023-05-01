@@ -5,10 +5,13 @@
 
 using namespace std;
 
-param::param(int my_rank, int size, int grid_dim)
-    : my_rank(my_rank), size(size), grid_dim(grid_dim) {}
+param::param(int my_rank, int size, int grid_dim, string solver, string x_point)
+    : my_rank(my_rank), size(size), grid_dim(grid_dim) {
+  this->solver = solver == "-gs" ? "gauss-seidel" : "damped-jacobi";
+  this->grid_type = x_point == "-fps" ? "five-point" : "nine-point";
+}
 
-void param::read_param_from_file(string file) {
+void param::read(string file) {
   double om, eps;
   ifstream ifs(file);
   ifs >> om;
@@ -20,6 +23,7 @@ void param::read_param_from_file(string file) {
   epsilon = eps;
   step_size_h = 1.0 / grid_dim;
   empty_rows = 0;
+  iterations = 0;
 
   if (matrix_dim % size > 0) {
     block_length++;
@@ -30,4 +34,14 @@ void param::read_param_from_file(string file) {
       (my_rank == size - 1) ? block_length - empty_rows : block_length;
   matrix_dim_no_empty_rows = matrix_dim;
   matrix_dim += empty_rows;
+}
+
+void param::write_append_csv(string file) {
+  ofstream of;
+
+  of.open(file, ios::out | ios::app);
+  string seq = size > 1 ? "parallel" : "serial";
+  of << seq << "," << size << "," << grid_dim << "," << matrix_dim_no_empty_rows
+     << "," << solver << "," << grid_type << "," << time << "," << iterations
+     << "," << epsilon << "," << omega << "," << step_size_h << endl;
 }

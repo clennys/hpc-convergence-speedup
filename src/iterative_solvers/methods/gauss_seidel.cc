@@ -85,7 +85,7 @@ bool stopping_criterion(double *r, double *x, param p) {
   return false;
 }
 
-void run(double *mat, double *x, double *b, param p) {
+int run(double *mat, double *x, double *b, param p) {
 
   double x_new[p.block_length], sub_mat[p.block_length * p.matrix_dim],
       r_local[p.block_length], r_gathered[p.matrix_dim],
@@ -93,8 +93,8 @@ void run(double *mat, double *x, double *b, param p) {
 
   setup(mat, sub_mat, x, x_new, b, p);
 
-  int count = 0;
   int continues = 1;
+  int counter = 0;
   while (true) {
     step(mat, sub_mat, x, b, r_local, r_gathered, y_scatter, y_local, x_new, p);
     if (p.my_rank == ROOT_PROC) {
@@ -105,12 +105,12 @@ void run(double *mat, double *x, double *b, param p) {
 
     MPI_Bcast(&continues, 1, MPI_INT, ROOT_PROC, MPI_COMM_WORLD);
 
+    p.iterations++;
     if (continues == 0) {
-      return;
+      return counter;
     }
-
-    count++;
   }
+  return -1;
 }
 } // namespace parallel
 namespace serial {
@@ -156,17 +156,20 @@ bool stopping_criterion(double *matrix, double *x, double *b, double *r,
   return true;
 }
 
-void run(double *matrix, double *x, double *b, param p) {
+int run(double *matrix, double *x, double *b, param p) {
   double *x_new = new double[p.matrix_dim];
   double *r = new double[p.matrix_dim];
   double *y = new double[p.matrix_dim];
+  int counter = 0;
   do {
     step(x_new, matrix, b, x, r, y, p);
     double *tmp;
     tmp = x_new;
     x_new = x;
     x = tmp;
+    counter++;
   } while (stopping_criterion(matrix, x, b, r, p));
+  return counter;
 }
 } // namespace serial
 
