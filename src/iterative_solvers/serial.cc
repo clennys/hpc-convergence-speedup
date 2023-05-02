@@ -38,7 +38,7 @@ void run_serial(string solver, string x_point_formula, int grid_dim) {
     cout << "===== Using Nine-Point-Stencil =====" << endl;
     discretized_grid::nine_point_stencil(matrix, b, p);
   } else {
-    cout << "Select Serial Destretize Method!" << endl;
+    cout << "Select Serial Descretize Method!" << endl;
   }
 
   print_matrix(matrix, p.matrix_dim);

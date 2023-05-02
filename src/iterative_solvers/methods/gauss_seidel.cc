@@ -78,7 +78,7 @@ bool stopping_criterion(double *r, double *x, param p) {
   }
   double diff = sqrt(norm_r) / sqrt(norm_x);
   diff = diff > 0 ? diff : -diff;
-  cout << "diff: " << diff << " epsilon: " << p.epsilon << endl;
+  // cout << "diff: " << diff << " epsilon: " << p.epsilon << endl;
   if (diff < p.epsilon) {
     return true;
   }
@@ -149,7 +149,7 @@ bool stopping_criterion(double *matrix, double *x, double *b, double *r,
   }
   double diff = sqrt(norm_r) / sqrt(norm_x);
   diff = diff > 0 ? diff : -diff;
-  cout << "diff: " << diff << " epsilon: " << p.epsilon << endl;
+  // cout << "diff: " << diff << " epsilon: " << p.epsilon << endl;
   if (diff < p.epsilon) {
     return false;
   }
