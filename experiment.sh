@@ -6,8 +6,8 @@ for i in {2..64}; do
         square=$((dim * dim))
         if [ "$square" -ge "$i" ]; then
 			echo "[Processes: $i/64] :: Grid dim = $j/67 :: Matrix dim = $square"
-			mpirun -np $i ./build/apps/main -p -dj -fps -gd $j >> damped_jacobi.log
-			mpirun -np $i ./build/apps/main -p -gs -fps -gd $j >> gauss_seidel.log
+			mpirun -np $i ./build/apps/main -p -dj -fps -gd $j >> "damped_jacobi_$i_$dim.log"
+			mpirun -np $i ./build/apps/main -p -gs -fps -gd $j >> "gauss_seidel$i_$square.log"
 		fi
 	done
 done
