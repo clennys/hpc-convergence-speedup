@@ -44,7 +44,7 @@ void run_parallel(string solver, string x_point_formula, int grid_size) {
     }
 
     // print_matrix(matrix, p.matrix_dim);
-    print_vector(b, p.matrix_dim);
+    // print_vector(b, p.matrix_dim);
   }
 
   double start = MPI_Wtime();
