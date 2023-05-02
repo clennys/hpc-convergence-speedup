@@ -105,7 +105,7 @@ int run(double *mat, double *x, double *b, param p) {
 
     MPI_Bcast(&continues, 1, MPI_INT, ROOT_PROC, MPI_COMM_WORLD);
 
-    p.iterations++;
+    counter++;
     if (continues == 0) {
       return counter;
     }
