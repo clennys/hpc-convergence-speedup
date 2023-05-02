@@ -58,8 +58,7 @@ bool stopping_criterion(double *r, double *x, param p) {
   return gauss_seidel::parallel::stopping_criterion(r, x, p);
 }
 
-int run(double *mat, double *x, double *b, param p) {
-  double x_new[p.block_length];
+int run(double *mat, double *x, double *x_new, double *b, param p) {
   double sub_mat[p.block_length * p.matrix_dim];
   double r_local[p.block_length], r_gathered[p.matrix_dim];
 
@@ -131,8 +130,7 @@ bool stopping_criterion(double *matrix, double *x, double *b, double *r,
   }
   return true;
 }
-int run(double *matrix, double *x, double *b, param p) {
-  double *x_new = new double[p.matrix_dim];
+int run(double *matrix, double *x, double *x_new, double *b, param p) {
   double *r = new double[p.matrix_dim];
   int counter = 0;
   do {

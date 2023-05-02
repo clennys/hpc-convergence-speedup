@@ -21,15 +21,17 @@ void run_serial(string solver, string x_point_formula, int grid_dim) {
   cout << "===== Serial Computing =====" << endl;
   double *b, *b_check;
   double *matrix;
-  double *x;
+  double *x, *x_new;
 
   param p(0, 1, grid_dim, solver, x_point_formula);
   p.read("input.txt");
 
   b = new double[p.matrix_dim];
   x = new double[p.matrix_dim];
+  x_new = new double[p.matrix_dim];
   matrix = new double[p.matrix_dim * p.matrix_dim];
   zero_matrix_init(x, p.matrix_dim, 1);
+  zero_matrix_init(x_new, p.matrix_dim, 1);
 
   if (x_point_formula == "-fps") {
     cout << "===== Using Five-Point-Stencil =====" << endl;
@@ -46,10 +48,10 @@ void run_serial(string solver, string x_point_formula, int grid_dim) {
   auto start = high_resolution_clock::now();
   if (solver == "-dj") {
     cout << "===== Executing Damped Jacobi =====" << endl;
-    p.iterations = damped_jacobi::serial::run(matrix, x, b, p);
+    p.iterations = damped_jacobi::serial::run(matrix, x, x_new, b, p);
   } else if (solver == "-gs") {
     cout << "===== Executing Gauss-Seidel  =====" << endl;
-    p.iterations = gauss_seidel::serial::run(matrix, x, b, p);
+    p.iterations = gauss_seidel::serial::run(matrix, x, x_new, b, p);
   } else {
     cout << "Select Method for serial computation!" << endl;
   }

@@ -16,7 +16,7 @@ void run_parallel(string solver, string x_point_formula, int grid_size) {
 
   double *b, *b_check;
   double *matrix;
-  double *x; //*x_true;
+  double *x, *x_new;
 
   startup_MPI(&my_rank, &size);
 
@@ -28,6 +28,8 @@ void run_parallel(string solver, string x_point_formula, int grid_size) {
 
   b = new double[p.matrix_dim];
   x = new double[p.matrix_dim];
+  x_new = new double[p.matrix_dim];
+  zero_matrix_init(x_new, p.matrix_dim, 1);
 
   if (my_rank == ROOT_PROC) {
     zero_matrix_init(x, p.matrix_dim, 1);
@@ -52,12 +54,12 @@ void run_parallel(string solver, string x_point_formula, int grid_size) {
     if (my_rank == ROOT_PROC) {
       cout << "===== Executing Damped Jacobi =====" << endl;
     }
-    p.iterations = damped_jacobi::parallel::run(matrix, x, b, p);
+    p.iterations = damped_jacobi::parallel::run(matrix, x, x_new, b, p);
   } else if (solver == "-gs") {
     if (my_rank == ROOT_PROC) {
       cout << "===== Executing Gauss-Seidel  =====" << endl;
     }
-    p.iterations = gauss_seidel::parallel::run(matrix, x, b, p);
+    p.iterations = gauss_seidel::parallel::run(matrix, x, x_new, b, p);
   } else {
     if (my_rank == ROOT_PROC) {
       cout << "Select Method for parallel computation!" << endl;

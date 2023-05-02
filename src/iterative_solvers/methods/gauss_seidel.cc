@@ -85,11 +85,11 @@ bool stopping_criterion(double *r, double *x, param p) {
   return false;
 }
 
-int run(double *mat, double *x, double *b, param p) {
+int run(double *mat, double *x, double *x_new, double *b, param p) {
 
-  double x_new[p.block_length], sub_mat[p.block_length * p.matrix_dim],
-      r_local[p.block_length], r_gathered[p.matrix_dim],
-      y_scatter[p.matrix_dim], y_local[p.block_length];
+  double sub_mat[p.block_length * p.matrix_dim], r_local[p.block_length],
+      r_gathered[p.matrix_dim], y_scatter[p.matrix_dim],
+      y_local[p.block_length];
 
   setup(mat, sub_mat, x, x_new, b, p);
 
@@ -156,8 +156,7 @@ bool stopping_criterion(double *matrix, double *x, double *b, double *r,
   return true;
 }
 
-int run(double *matrix, double *x, double *b, param p) {
-  double *x_new = new double[p.matrix_dim];
+int run(double *matrix, double *x, double *x_new, double *b, param p) {
   double *r = new double[p.matrix_dim];
   double *y = new double[p.matrix_dim];
   int counter = 0;

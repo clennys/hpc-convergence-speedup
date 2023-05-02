@@ -21,6 +21,7 @@ double f_nine_point(double x, double y) {
 
 void five_point_stencil(double *A, double *b, param p) {
   zero_matrix_init(A, p.matrix_dim, p.matrix_dim);
+  zero_matrix_init(b, p.matrix_dim, 1);
 
   int k = 0;
   double h_squared = 1 / (p.step_size_h * p.step_size_h);
