@@ -43,7 +43,8 @@ void run_serial(string solver, string x_point_formula, int grid_dim) {
     cout << "Select Serial Descretize Method!" << endl;
   }
 
-  print_matrix(matrix, p.matrix_dim);
+  // print_matrix(matrix, p.matrix_dim);
+  // print_vector(b, p.matrix_dim);
 
   auto start = high_resolution_clock::now();
   if (solver == "-dj") {
@@ -64,11 +65,11 @@ void run_serial(string solver, string x_point_formula, int grid_dim) {
   cout << endl << "b is: " << endl;
   print_vector(b, p.matrix_dim);
 
-  cout << endl << "b_check is: " << endl;
-  b_check = new double[p.matrix_dim];
-  matrix_multiplication(b_check, matrix, x, p.matrix_dim, p.matrix_dim, 1);
-  print_vector(b_check, p.matrix_dim);
-
+  // cout << endl << "b_check is: " << endl;
+  // b_check = new double[p.matrix_dim];
+  // matrix_multiplication(b_check, matrix, x, p.matrix_dim, p.matrix_dim, 1);
+  // print_vector(b_check, p.matrix_dim);
+  //
   p.time = elapsed.count() * 1e-9;
 
   cout << "The process took " << elapsed.count() * 1e-9 << " seconds to run."

@@ -114,7 +114,7 @@ void nine_point_stencil(double *A, double *b, param p) {
   double h_squared = p.step_size_h * p.step_size_h;
   for (int j = 1; j < p.grid_dim; j++) {
     for (int i = 1; i < p.grid_dim; i++) {
-      b[k] = 4 * h_squared * f_nine_point(i * p.step_size_h, j * p.step_size_h);
+      b[k] = h_squared * f_nine_point(i * p.step_size_h, j * p.step_size_h);
       k++;
     }
   }
