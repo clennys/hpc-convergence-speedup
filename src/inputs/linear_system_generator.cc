@@ -64,7 +64,7 @@ void nine_point_stencil(double *A, double *b, param p) {
   zero_matrix_init(A, p.matrix_dim, p.matrix_dim);
   zero_matrix_init(b, p.matrix_dim, 1);
 
-  double T_lower_upper_diagonal = 1.0 / 4;
+  double T_lower_upper_diagonal = 1.0 / 9;
   double T_diagonal = 4.0 / 9;
 
   double M_lower_upper_diagonal = 1.0 / 36;
