@@ -70,8 +70,8 @@ void nine_point_stencil(double *A, double *b, param p) {
   double M_lower_upper_diagonal = 1.0 / 36;
   double M_diagonal = T_lower_upper_diagonal;
 
-  int nr_block_matrices_rows = p.matrix_dim / (p.grid_dim - 1);
-  for (int i = 0; i < p.matrix_dim; i += nr_block_matrices_rows) {
+  int nr_block_matrices_rows = p.matrix_dim_no_empty_rows / (p.grid_dim - 1);
+  for (int i = 0; i < p.matrix_dim_no_empty_rows; i += nr_block_matrices_rows) {
 
     // diagonal
     for (int j = 0; j < nr_block_matrices_rows; j++) {
@@ -97,7 +97,7 @@ void nine_point_stencil(double *A, double *b, param p) {
     }
 
     // upper diagonal
-    if (i < p.matrix_dim - nr_block_matrices_rows) {
+    if (i < p.matrix_dim_no_empty_rows - nr_block_matrices_rows) {
       for (int j = 0; j < nr_block_matrices_rows; j++) {
         int u = i + j + nr_block_matrices_rows;
         int k = i + j;
