@@ -11,15 +11,15 @@ double f_least_square(double x, double y) {
   return 2 * (y * (1 - y) + x * (1 - x));
 };
 
-double phi_nine_point(double x, double y) {
+double phi_l2_projection(double x, double y) {
   return (1 - x) * (1 - x) * (1 - y) * (1 - y);
 }
 
-double f_nine_point(double x, double y) {
+double f_l2_projection(double x, double y) {
   return 2 * ((x - 1) * (x - 1) + (y - 1) * (y - 1));
 }
 
-void five_point_stencil(double *A, double *b, param p) {
+void laplace(double *A, double *b, param p) {
   zero_matrix_init(A, p.matrix_dim, p.matrix_dim);
   zero_matrix_init(b, p.matrix_dim, 1);
 
@@ -60,7 +60,7 @@ void five_point_stencil(double *A, double *b, param p) {
   }
 }
 
-void nine_point_stencil(double *A, double *b, param p) {
+void L2_projection(double *A, double *b, param p) {
   zero_matrix_init(A, p.matrix_dim, p.matrix_dim);
   zero_matrix_init(b, p.matrix_dim, 1);
 
@@ -114,28 +114,10 @@ void nine_point_stencil(double *A, double *b, param p) {
   double h_squared = p.step_size_h * p.step_size_h;
   for (int j = 1; j < p.grid_dim; j++) {
     for (int i = 1; i < p.grid_dim; i++) {
-      b[k] = h_squared * f_nine_point(i * p.step_size_h, j * p.step_size_h);
+      b[k] = h_squared * f_l2_projection(i * p.step_size_h, j * p.step_size_h);
       k++;
     }
   }
 }
 
 } // namespace discretized_grid
-
-// int main(int argc, char *argv[]) {
-//   param p(0, 1);
-//   p.read_param_from_file("input.txt");
-//   cout << p.step_size_h << p.grid_dim << endl;
-//
-//   double *A = new double[p.matrix_dim * p.matrix_dim];
-//   double *b = new double[p.matrix_dim];
-//   double *x = new double[p.matrix_dim];
-//
-//   discretized_grid_linear_system(A, b, p);
-//   cout << "Matrix A: " << endl;
-//   print_matrix(A, p.matrix_dim);
-//   cout << "Solution b: " << endl;
-//   print_vector(b, p.matrix_dim);
-//
-//   return 0;
-// }

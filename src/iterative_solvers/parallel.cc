@@ -36,10 +36,10 @@ void run_parallel(string solver, string x_point_formula, int grid_size) {
     matrix = new double[p.matrix_dim * p.matrix_dim];
     if (x_point_formula == "-fps") {
       cout << "===== Using Five-Point-Stencil =====" << endl;
-      discretized_grid::five_point_stencil(matrix, b, p);
+      discretized_grid::laplace(matrix, b, p);
     } else if (x_point_formula == "-nps") {
       cout << "===== Using Nine-Point-Stencil =====" << endl;
-      discretized_grid::nine_point_stencil(matrix, b, p);
+      discretized_grid::L2_projection(matrix, b, p);
     } else {
       cout << "Select parallel Discretize method!" << endl;
       exit(1);
