@@ -18,7 +18,9 @@ void setup(double *mat, double *sub_mat, double *x_init, double *x_new,
               MPI_COMM_WORLD);
 }
 
-void calc_r(double *sub_mat, double *x, double *b, double *r_local, param p) {
+void calc_r(double *sub_mat, double *x, double *b, double *r_local,
+            double *r_norm, param p) {
+  *r_norm = 0;
   double sum;
   for (int i = 0; i < p.rank_block_length; i++) {
     sum = 0;
@@ -26,6 +28,7 @@ void calc_r(double *sub_mat, double *x, double *b, double *r_local, param p) {
       sum += sub_mat[i * p.matrix_dim + j] * x[j];
     }
     r_local[i] = sum - b[p.my_rank * p.block_length + i];
+    *r_norm += r_local[i] * r_local[i];
   }
 }
 
@@ -45,9 +48,9 @@ void forward_substitution(double *mat_GS, double *r, double *y, param p) {
 
 void step(double *mat, double *sub_mat, double *x, double *b, double *r_local,
           double *r_gathered, double *y_scatter, double *y_local, double *x_new,
-          param p) {
+          double *r_norm, double *x_norm, param p) {
 
-  calc_r(sub_mat, x, b, r_local, p);
+  calc_r(sub_mat, x, b, r_local, r_norm, p);
 
   MPI_Gather(r_local, p.block_length, MPI_DOUBLE, r_gathered, p.block_length,
              MPI_DOUBLE, ROOT_PROC, MPI_COMM_WORLD);
@@ -60,29 +63,30 @@ void step(double *mat, double *sub_mat, double *x, double *b, double *r_local,
 
   MPI_Scatter(y_scatter, p.block_length, MPI_DOUBLE, y_local, p.block_length,
               MPI_DOUBLE, ROOT_PROC, MPI_COMM_WORLD);
+  *x_norm = 0;
   for (int i = 0; i < p.rank_block_length; i++) {
     x_new[i] = x[p.my_rank * p.block_length + i] - y_local[i];
+    *x_norm += x_new[i] * x_new[i];
   }
 
   MPI_Allgather(x_new, p.block_length, MPI_DOUBLE, x, p.block_length,
                 MPI_DOUBLE, MPI_COMM_WORLD);
 }
 
-bool stopping_criterion(double *r, double *x, param p) {
-  double norm_r = 0;
-  double norm_x = 0;
+bool stopping_criterion(double *r_norm, double *x_norm, param p) {
 
-  for (int i = 0; i < p.matrix_dim_no_empty_rows; i++) {
-    norm_x += x[i] * x[i];
-    norm_r += r[i] * r[i];
-  }
+  double norm_r, norm_x;
+
+  MPI_Allreduce(r_norm, &norm_r, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+  MPI_Allreduce(x_norm, &norm_x, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+
   double diff = sqrt(norm_r) / sqrt(norm_x);
   diff = diff > 0 ? diff : -diff;
-  // cout << "diff: " << diff << " epsilon: " << p.epsilon << endl;
-  if (diff < p.epsilon) {
-    return true;
-  }
-  return false;
+  // if (p.my_rank == ROOT_PROC) {
+  //   cout << "r norm: " << norm_r << " x norm: " << norm_x << endl;
+  //   cout << "diff: " << diff << " epsilon: " << p.epsilon << endl;
+  // }
+  return diff < p.epsilon ? true : false;
 }
 
 int run(double *mat, double *x, double *x_new, double *b, param p) {
@@ -90,23 +94,17 @@ int run(double *mat, double *x, double *x_new, double *b, param p) {
   double sub_mat[p.block_length * p.matrix_dim], r_local[p.block_length],
       r_gathered[p.matrix_dim], y_scatter[p.matrix_dim],
       y_local[p.block_length];
+  double r_norm = 0.0;
+  double x_norm = 0.0;
 
   setup(mat, sub_mat, x, x_new, b, p);
 
-  int continues = 1;
   int counter = 0;
   while (true) {
-    step(mat, sub_mat, x, b, r_local, r_gathered, y_scatter, y_local, x_new, p);
-    if (p.my_rank == ROOT_PROC) {
-      if (stopping_criterion(r_gathered, x, p)) {
-        continues = 0;
-      }
-    }
-
-    MPI_Bcast(&continues, 1, MPI_INT, ROOT_PROC, MPI_COMM_WORLD);
-
+    step(mat, sub_mat, x, b, r_local, r_gathered, y_scatter, y_local, x_new,
+         &r_norm, &x_norm, p);
     counter++;
-    if (continues == 0) {
+    if (stopping_criterion(&r_norm, &x_norm, p)) {
       return counter;
     }
   }

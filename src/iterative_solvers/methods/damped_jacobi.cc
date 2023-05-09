@@ -24,8 +24,10 @@ void setup(double *mat, double *x_init, double *b, double *sub_mat, param p) {
               MPI_COMM_WORLD);
 }
 
-void calc_xnew(double *sub_mat, double *x, double *b, double *x_new, param p) {
+void calc_xnew(double *sub_mat, double *x, double *b, double *x_new,
+               double *x_norm, param p) {
   double sum;
+  *x_norm = 0;
 
   for (int i = 0; i < p.rank_block_length; i++) {
     sum = 0;
@@ -37,52 +39,44 @@ void calc_xnew(double *sub_mat, double *x, double *b, double *x_new, param p) {
                (p.omega /
                 sub_mat[i * p.matrix_dim + (p.my_rank * p.block_length + i)]) *
                    (sum - b[p.my_rank * p.block_length + i]);
+    *x_norm += x_new[i] * x_new[i];
   }
 }
 void calc_r(double *sub_mat, double *x, double *b, double *r_local,
-            double *r_gathered, param p) {
-  gauss_seidel::parallel::calc_r(sub_mat, x, b, r_local, p);
-  MPI_Gather(r_local, p.block_length, MPI_DOUBLE, r_gathered, p.block_length,
-             MPI_DOUBLE, ROOT_PROC, MPI_COMM_WORLD);
+            double *r_norm, param p) {
+  gauss_seidel::parallel::calc_r(sub_mat, x, b, r_local, r_norm, p);
 }
 
-void step(double *sub_mat, double *x, double *b, double *x_new, param p) {
+void step(double *sub_mat, double *x, double *b, double *x_new, double *x_norm,
+          param p) {
 
-  calc_xnew(sub_mat, x, b, x_new, p);
+  calc_xnew(sub_mat, x, b, x_new, x_norm, p);
 
   MPI_Allgather(x_new, p.block_length, MPI_DOUBLE, x, p.block_length,
                 MPI_DOUBLE, MPI_COMM_WORLD);
 }
 
-bool stopping_criterion(double *r, double *x, param p) {
-  return gauss_seidel::parallel::stopping_criterion(r, x, p);
+bool stopping_criterion(double *r_norm, double *x_norm, param p) {
+  return gauss_seidel::parallel::stopping_criterion(r_norm, x_norm, p);
 }
 
 int run(double *mat, double *x, double *x_new, double *b, param p) {
   double sub_mat[p.block_length * p.matrix_dim];
-  double r_local[p.block_length], r_gathered[p.matrix_dim];
+  double r_local[p.block_length];
+  double r_norm = 0;
+  double x_norm = 0;
 
   setup(mat, x, b, sub_mat, p);
 
-  int continues = 1;
   int counter = 0;
   while (true) {
-    step(sub_mat, x, b, x_new, p);
-    calc_r(sub_mat, x, b, r_local, r_gathered, p);
+    step(sub_mat, x, b, x_new, &x_norm, p);
+    calc_r(sub_mat, x, b, r_local, &r_norm, p);
 
-    if (p.my_rank == ROOT_PROC) {
-      if (stopping_criterion(r_gathered, x, p)) {
-        continues = 0;
-      }
-    }
-    MPI_Barrier(MPI_COMM_WORLD);
-
-    MPI_Bcast(&continues, 1, MPI_INT, ROOT_PROC, MPI_COMM_WORLD);
-
-    if (continues == 0) {
+    counter++;
+    if (stopping_criterion(&r_norm, &x_norm, p)) {
       return counter;
     }
-    counter++;
   }
   return -1;
 }
