@@ -3,174 +3,19 @@ import pandas as pd
 
 from bokeh.io import curdoc
 from bokeh.plotting import figure
-from bokeh.layouts import column, row, Spacer
-from bokeh.models import ColumnDataSource, HoverTool, LassoSelectTool, Select, Slider
-from bokeh.palettes import TolRainbow, Turbo256
-from bokeh.transform import factor_cmap, linear_cmap, log_cmap
-from bokeh.io import output_file, save, show, output_notebook
+from bokeh.layouts import column, row
+from bokeh.models import ColumnDataSource, HoverTool, Select, Slider
+from bokeh.io import output_file, save, show
+from bokeh.palettes import Category10, Bokeh
+
+from plots.speedup import draw_speedup, draw_speedup_static
+from plots.timing import draw_timing_grid, draw_timing_processes, draw_timing_processes_static
+from plots.efficency import draw_efficiency, draw_efficiency_static
 
 
 # import data
 file_path = "./output_clean.csv"
 data = pd.read_csv(file_path)
-
-
-def draw_grid_vs_time(df, nr_processes, linear_system):
-    filtered_data = df.loc[df["nr_processes"] == nr_processes]
-    filtered_data = filtered_data.loc[filtered_data["linear_system"] == linear_system]
-
-    gauss_seidel = filtered_data.loc[filtered_data["solver"] == "gauss-seidel"]
-    damped_jacobi = filtered_data.loc[filtered_data["solver"] == "damped-jacobi"]
-
-    source_gs = ColumnDataSource(gauss_seidel)
-    source_dj = ColumnDataSource(damped_jacobi)
-
-    p = figure(
-        title=f"Speed up with {nr_processes} of parallel processes",
-        tools="pan, wheel_zoom, reset",
-        toolbar_location="below",
-        width=500,
-        height=450,
-    )
-
-    pl_gs = p.line(
-        source=source_gs,
-        x="grid_dim",
-        y="time",
-        legend_label="Gauss-Seidel",
-        line_color="blue",
-    )
-
-    pl_dj = p.line(
-        source=source_dj,
-        x="grid_dim",
-        y="time",
-        legend_label="Damped-Jacobi",
-        line_color="red",
-    )
-    c_gs = p.circle(
-        source=source_gs,
-        x="grid_dim",
-        y="time",
-        legend_label="Gauss-Seidel",
-        line_color="blue",
-        fill_color="blue",
-        fill_alpha=0.2,
-    )
-
-    c_dj = p.circle(
-        source=source_dj,
-        x="grid_dim",
-        y="time",
-        legend_label="Damped-Jacobi",
-        line_color="red",
-        fill_color="red",
-        fill_alpha=0.2,
-    )
-
-    p.legend.click_policy = "mute"
-    p.legend.location = "top_left"
-    p.legend.orientation = "horizontal"
-    p.legend.background_fill_alpha = 0
-    p.legend.border_line_alpha = 0
-    p.legend.label_text_font_size = "10px"
-    p.legend.glyph_width = 16
-
-    hover = HoverTool(
-        tooltips=[
-            ("Solver", "@solver"),
-            ("Time", "@time"),
-            ("Grid Dim", "@grid_dim"),
-            ("Matrix Dim", "@matrix_size"),
-            ("iterations", "@iterations"),
-        ]
-    )
-
-    hover.mode = "mouse"
-    hover.renderers = [c_gs, c_dj]
-
-    p.add_tools(hover)
-
-    return p
-
-
-def draw_nr_proc_vs_time(df, grid_dim, linear_system):
-    filtered_data = df.loc[df["grid_dim"] == grid_dim]
-    filtered_data = filtered_data.loc[filtered_data["linear_system"] == linear_system]
-
-    gauss_seidel = filtered_data.loc[filtered_data["solver"] == "gauss-seidel"]
-    damped_jacobi = filtered_data.loc[filtered_data["solver"] == "damped-jacobi"]
-
-    source_gs = ColumnDataSource(gauss_seidel)
-    source_dj = ColumnDataSource(damped_jacobi)
-
-    p = figure(
-        title=f"Speed up with {grid_dim} dimension",
-        tools="pan, wheel_zoom, reset",
-        toolbar_location="below",
-        width=500,
-        height=450,
-    )
-
-    pl_gs = p.line(
-        source=source_gs,
-        x="nr_processes",
-        y="time",
-        legend_label="Gauss-Seidel",
-        line_color="blue",
-    )
-
-    pl_dj = p.line(
-        source=source_dj,
-        x="nr_processes",
-        y="time",
-        legend_label="Damped-Jacobi",
-        line_color="red",
-    )
-    c_gs = p.circle(
-        source=source_gs,
-        x="nr_processes",
-        y="time",
-        legend_label="Gauss-Seidel",
-        line_color="blue",
-        fill_color="blue",
-        fill_alpha=0.2,
-    )
-
-    c_dj = p.circle(
-        source=source_dj,
-        x="nr_processes",
-        y="time",
-        legend_label="Damped-Jacobi",
-        line_color="red",
-        fill_color="red",
-        fill_alpha=0.2,
-    )
-
-    p.legend.click_policy = "mute"
-    p.legend.location = "top_left"
-    p.legend.orientation = "horizontal"
-    p.legend.background_fill_alpha = 0
-    p.legend.border_line_alpha = 0
-    p.legend.label_text_font_size = "10px"
-    p.legend.glyph_width = 16
-
-    hover = HoverTool(
-        tooltips=[
-            ("Solver", "@solver"),
-            ("Time", "@time"),
-            ("Grid Dim", "@grid_dim"),
-            ("Matrix Dim", "@matrix_size"),
-            ("iterations", "@iterations"),
-        ]
-    )
-
-    hover.mode = "mouse"
-    hover.renderers = [c_gs, c_dj]
-
-    p.add_tools(hover)
-
-    return p
 
 
 def save_as_html(p):
@@ -179,86 +24,138 @@ def save_as_html(p):
     show(p)
 
 
+def speedup():
+    global speedup_p
+    speedup_p = draw_speedup(data, grid, input)
+
+def speedup_mult(solver, input_sel, title):
+    grid_input = [20, 25, 30, 35, 40, 50, 60]
+    colors = Bokeh[len(grid_input)] 
+    return draw_speedup_static(data, grid_input, input_sel, solver, colors, title)
+
 def grid_time():
-    global grid_time_p, slider_grid_time, input_matrix_grid_time
-    input_matrix = "five-point"
-    nr_proc = 10
-    grid_time_p = draw_grid_vs_time(data, nr_proc, input_matrix)
-    slider_grid_time = Slider(
-        start=1, end=64, value=10, step=1, title="Parallel Processes"
-    )
-
-    input_matrix_grid_time = Select(
-        title="Select Input",
-        value=input_matrix,
-        options=["five-point", "nine-point"],
-        width=200,
-        # margin= (20,10,10,29),
-    )
-
-    def callback_slider_grid_time(attr, old, new):
-        nr_proc = slider_grid_time.value
-        layout.children[0].children[0] = draw_grid_vs_time(data, nr_proc, input_matrix)
-
-    def callback_input_matrix_grid_time(attr, old, new):
-        matrix = input_matrix_grid_time.value
-        layout.children[0].children[0] = draw_grid_vs_time(data, nr_proc, matrix)
-
-    slider_grid_time.on_change("value", callback_slider_grid_time)
-    input_matrix_grid_time.on_change("value", callback_input_matrix_grid_time)
-
+    global grid_time_p
+    grid_time_p = draw_timing_grid(data, nr_proc, input)
 
 def nr_proc_time():
+    global nr_proc_time_p
+    nr_proc_time_p = draw_timing_processes(data, grid, input)
 
-    global nr_proc_time_p, slider_nr_proc_time, input_matrix_nr_proc_time
-    input_matrix = "five-point"
-    grid = 42
-    nr_proc_time_p = draw_nr_proc_vs_time(data, grid, input_matrix)
-    slider_nr_proc_time = Slider(
-        start=2, end=80, value=42, step=1, title="Grid Dimension"
-    )
+def nr_proc_time_mult(solver, input_sel, title):
+    grid_input = [20, 25, 30, 35, 40, 50, 60]
+    colors = Bokeh[len(grid_input)] 
+    return draw_timing_processes_static(data, grid_input, input_sel, solver, colors, title)
 
-    input_matrix_nr_proc_time = Select(
-        title="Select Input",
-        value=input_matrix,
-        options=["five-point", "nine-point"],
-        width=200,
-        # margin= (20,10,10,29),
-    )
 
-    def callback_slider_nr_proc_time(attr, old, new):
-        grid = slider_nr_proc_time.value
-        layout.children[0].children[1] = draw_nr_proc_vs_time(data, grid, input_matrix)
+def efficiency():
+    global efficiency_p
+    efficiency_p = draw_efficiency(data, grid, input)
 
-    def callback_input_matrix_nr_proc_time(attr, old, new):
-        matrix = input_matrix_nr_proc_time.value
-        layout.children[0].children[1] = draw_nr_proc_vs_time(data, grid, matrix)
+def efficiency_mult(solver, input_sel, title):
+    grid_input = [20, 25, 30, 35, 40, 50, 60]
+    colors = Bokeh[len(grid_input)] 
+    return draw_efficiency_static(data, grid_input, input_sel, solver, colors, title)
 
-    slider_nr_proc_time.on_change("value", callback_slider_nr_proc_time)
-    input_matrix_nr_proc_time.on_change("value", callback_input_matrix_nr_proc_time)
 
 
 # PLOTS
+grid = 42
+input = "five-point"
+nr_proc = 10
+slider_grid = Slider(start=2, end=80, value=42, step=1, title="Grid Dimension")
+slider_processes = Slider(start=1, end=64, value=10, step=1, title="Parallel Processes")
+select_input = Select(
+    title="Select Input",
+    value=input,
+    options=["five-point", "nine-point"],
+    width=200,
+    # margin= (20,10,10,29),
+)
+
+
 grid_time()
 nr_proc_time()
+speedup()
+efficiency()
 
+p_dj_f_s = speedup_mult("damped-jacobi", "five-point", "Damped-Jacobi Speedup for Five-Point")
+p_dj_n_s = speedup_mult("damped-jacobi", "nine-point", "Damped-Jacobi Speedup for L2-Projection")
+p_gs_f_s = speedup_mult("gauss-seidel", "five-point",  "Gauss-Seidel Speedup for Five-Point")
+p_gs_n_s = speedup_mult("gauss-seidel", "nine-point",  "Gauss-Seidel Speedup for L2-Projection")
+
+
+p_dj_f_t = nr_proc_time_mult("damped-jacobi", "five-point", "Damped-Jacobi Timing for Five-Point")
+p_dj_n_t = nr_proc_time_mult("damped-jacobi", "nine-point", "Damped-Jacobi Timing for L2-Projection")
+p_gs_f_t = nr_proc_time_mult("gauss-seidel", "five-point",  "Gauss-Seidel Timing for Five-Point")
+p_gs_n_t = nr_proc_time_mult("gauss-seidel", "nine-point",  "Gauss-Seidel Timing for L2-Projection")
+
+p_dj_f_e = efficiency_mult("damped-jacobi", "five-point",  "Damped-Jacobi Efficiency for Five-Point")
+p_dj_n_e = efficiency_mult("damped-jacobi", "nine-point",  "Damped-Jacobi Efficiency for L2-Projection")
+p_gs_f_e = efficiency_mult("gauss-seidel", "five-point",  "Gauss-Seidel Efficiency for Five-Point")
+p_gs_n_e = efficiency_mult("gauss-seidel", "nine-point",  "Gauss-Seidel Efficiency for L2-Projection")
+
+
+
+
+
+def callback_slider_processes(attr, old, new):
+    global nr_proc
+    nr_proc = slider_processes.value
+    layout.children[1].children[1] = draw_timing_grid(data, nr_proc, input)
+
+
+def callback_select_input(attr, old, new):
+    global input
+    input = select_input.value
+    layout.children[0].children[0] = draw_speedup(data, grid, input)
+    layout.children[0].children[1] = draw_efficiency(data, grid, input)
+    layout.children[1].children[0] = draw_timing_processes(data, nr_proc, input)
+    layout.children[1].children[1] = draw_timing_grid(data, grid, input)
+
+
+def callback_slider_grid(attr, old, new):
+    global grid
+    grid = slider_grid.value
+    layout.children[0].children[0] = draw_speedup(data, grid, input)
+    layout.children[0].children[1] = draw_efficiency(data, grid, input)
+    layout.children[1].children[0] = draw_timing_processes(data, grid, input)
+
+
+select_input.on_change("value", callback_select_input)
+slider_processes.on_change("value", callback_slider_processes)
+slider_grid.on_change("value", callback_slider_grid)
 
 # LAYOUT
 layout = row(
-     column(
-         grid_time_p,
-         nr_proc_time_p,
-         width=500,
-     ),
-     column(
-         slider_grid_time,
-         input_matrix_grid_time,
-         Spacer(height=340),
-         slider_nr_proc_time,
-         input_matrix_nr_proc_time,
-         width=350,
-     ),
- )
+    column(
+        speedup_p,
+        efficiency_p,
+        # p_dj_f_s,
+        # p_dj_n_s,
+        # p_dj_f_t,
+        # p_dj_n_t,
+        # p_dj_f_e,
+        # p_dj_n_e,
+        width=500,
+    ),
+    column(
+        nr_proc_time_p,
+        grid_time_p,
+        # p_gs_f_s,
+        # p_gs_n_s,
+        # p_gs_f_t,
+        # p_gs_n_t,
+        # p_gs_f_e,
+        # p_gs_n_e,
+        width=500,
+    ),
+    column(
+        select_input,
+        slider_processes,
+        slider_grid,
+        width=350,
+    ),
+)
 
 curdoc().add_root(layout)
 curdoc().title = "Numerical Training"

@@ -71,7 +71,7 @@ int run(double *mat, double *x, double *x_new, double *b, param p) {
   int counter = 0;
   while (true) {
     step(sub_mat, x, b, x_new, &x_norm, p);
-    calc_r(sub_mat, x, b, r_local, &r_norm, p);
+    calc_r(sub_mat, x_new, b, r_local, &r_norm, p);
 
     counter++;
     if (stopping_criterion(&r_norm, &x_norm, p)) {

@@ -78,10 +78,10 @@ void run_parallel(string solver, string x_point_formula, int grid_size) {
     cout << endl << "b is: " << endl;
     print_vector(b, p.matrix_dim);
 
-    // cout << endl << "b_check is: " << endl;
-    // b_check = new double[p.matrix_dim];
-    // matrix_multiplication(b_check, matrix, x, p.matrix_dim, p.matrix_dim, 1);
-    // print_vector(b_check, p.matrix_dim);
+    cout << endl << "b_check is: " << endl;
+    b_check = new double[p.matrix_dim];
+    matrix_multiplication(b_check, matrix, x, p.matrix_dim, p.matrix_dim, 1);
+    print_vector(b_check, p.matrix_dim);
 
     cout << "The process took " << elapsed << " seconds to run." << endl;
     p.write_append_csv("output.csv");

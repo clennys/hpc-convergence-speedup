@@ -82,10 +82,10 @@ bool stopping_criterion(double *r_norm, double *x_norm, param p) {
 
   double diff = sqrt(norm_r) / sqrt(norm_x);
   diff = diff > 0 ? diff : -diff;
-  // if (p.my_rank == ROOT_PROC) {
-  //   cout << "r norm: " << norm_r << " x norm: " << norm_x << endl;
-  //   cout << "diff: " << diff << " epsilon: " << p.epsilon << endl;
-  // }
+  if (p.my_rank == ROOT_PROC) {
+    //   cout << "r norm: " << norm_r << " x norm: " << norm_x << endl;
+    cout << "diff: " << diff << " epsilon: " << p.epsilon << endl;
+  }
   return diff < p.epsilon ? true : false;
 }
 

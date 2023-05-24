@@ -15988,3 +15988,10 @@ parallel,2,38,1369,gauss-seidel,nine-point,0.56489,29,1e-11,0.666667,0.0263158
 parallel,2,39,1444,damped-jacobi,nine-point,1.37943,79,1e-11,0.666667,0.025641
 parallel,15,61,3600,damped-jacobi,nine-point,0.178897,77,1e-11,0.666667,0.0163934
 parallel,15,61,3600,damped-jacobi,five-point,53.2266,32022,1e-11,0.666667,0.0163934
+parallel,4,5,16,gauss-seidel,five-point,0.000756453,69,1e-11,1,0.2
+parallel,4,21,400,gauss-seidel,five-point,0.0876335,1263,1e-11,1,0.047619
+parallel,14,40,1521,gauss-seidel,five-point,5.01466,4588,1e-11,1,0.025
+parallel,14,40,1521,gauss-seidel,five-point,4.58095,4588,1e-11,1,0.025
+parallel,14,40,1521,damped-jacobi,five-point,3.38449,9172,1e-11,1,0.025
+parallel,7,7,36,damped-jacobi,nine-point,0.0353377,3610,1e-11,1,0.142857
+parallel,10,40,1521,damped-jacobi,nine-point,0.0521422,80,1e-11,0.666667,0.025
