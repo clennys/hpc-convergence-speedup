@@ -3,16 +3,18 @@ This project was created for the numerical training course at the Faculty of Mat
 
 ## Results
 
-### Parallel Damped Jacobi
+### Parallel Damped Jacobi and Gauss-Seidel
 ![damped jacobi](media/damped-jacobi.png)
 
-
-### Parallel Gauss-Seidel
 ![Gauss-Seidel](media/gauss-seidel.png)
 
+### Speedup
+![dj_speed](media/dj_speedup-fp.png)
+![gs_speed](media/gs_speedup_fp.png)
 
-### Five-Point Formula
-TODO
+### Efficiency
+![dj_eff](media/dj_efficiency-fp.png)
+![gs_eff](media/gs_efficiency_fp.png)
 
-### L2-Projection
-TODO
+### Timing
+![40_timing](media/timing_40.png)
